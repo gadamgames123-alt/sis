@@ -1,0 +1,1966 @@
+LOGO_B64=$(cat /tmp/lapd_logo_b64_single.txt)
+
+cat > /mnt/user-data/outputs/lapd_sis_v2.html << 'HTMLEOF_MARKER'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAPD SIS — Special Investigation Section</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0b;
+  --bg2: #111114;
+  --bg3: #18181d;
+  --bg4: #1e1e25;
+  --bg5: #252530;
+  --border: #2a2a35;
+  --border2: #3a3a48;
+  --text: #f0f0f5;
+  --text2: #9090a8;
+  --text3: #555568;
+  --accent: #c8a23a;
+  --accent2: #e0b84a;
+  --red: #e05050;
+  --red2: #ff6060;
+  --green: #4ec88a;
+  --blue: #4a8fff;
+  --cyan: #40d0e0;
+  --orange: #e08040;
+  --purple: #9060d0;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 4px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.6);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:14px;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+
+/* ===================== LOGIN ===================== */
+#login-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:32px;
+}
+.login-noise{
+  position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size:128px;
+  pointer-events:none;opacity:0.5;
+}
+.login-lines{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(200,162,58,0.02) 60px,rgba(200,162,58,0.02) 61px);
+  pointer-events:none;
+}
+.login-header{
+  text-align:center;
+  position:relative;z-index:1;
+  animation:fadeUp .8s ease both;
+}
+.login-logo{
+  width:110px;height:110px;
+  border-radius:50%;
+  margin:0 auto 20px;
+  display:block;
+  filter:drop-shadow(0 0 30px rgba(200,162,58,0.4));
+  animation:logoGlow 4s ease-in-out infinite;
+}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 20px rgba(200,162,58,0.3))}50%{filter:drop-shadow(0 0 40px rgba(200,162,58,0.6))}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes slideIn{from{transform:translateX(-12px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+
+.login-dept{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:5px;
+  color:var(--text3);text-transform:uppercase;margin-bottom:6px;
+}
+.login-title{
+  font-family:var(--font-display);font-size:52px;letter-spacing:6px;
+  color:var(--accent);line-height:1;
+}
+.login-sub{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:3px;
+  color:var(--text3);margin-top:6px;
+}
+.login-box{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-top:2px solid var(--accent);
+  padding:32px 36px;width:360px;
+  position:relative;z-index:1;
+  animation:fadeUp .8s .2s ease both;
+}
+.login-box::before{
+  content:'';position:absolute;top:-1px;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.6;
+}
+.field-lbl{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:3px;
+  color:var(--text3);display:block;margin-bottom:6px;text-transform:uppercase;
+}
+.field-inp{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-mono);font-size:13px;
+  padding:10px 12px;outline:none;transition:all .2s;border-radius:var(--radius);
+  margin-bottom:14px;
+}
+.field-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,162,58,.08);}
+.login-btn{
+  width:100%;padding:12px;
+  background:var(--accent);color:#000;
+  border:none;cursor:pointer;
+  font-family:var(--font-display);font-size:18px;letter-spacing:4px;
+  transition:all .2s;border-radius:var(--radius);
+}
+.login-btn:hover{background:var(--accent2);box-shadow:0 0 20px rgba(200,162,58,.3);}
+.login-err{
+  display:none;margin-top:12px;padding:8px 12px;
+  background:rgba(224,80,80,.1);border:1px solid rgba(224,80,80,.25);
+  font-family:var(--font-mono);font-size:10px;color:var(--red);letter-spacing:1px;text-align:center;
+}
+.login-warn{
+  font-family:var(--font-mono);font-size:9px;color:var(--text3);
+  letter-spacing:2px;text-align:center;
+  position:relative;z-index:1;animation:fadeUp .8s .4s ease both;
+}
+
+/* ===================== APP SHELL ===================== */
+#app{display:none;height:100vh;flex-direction:column;}
+#app.show{display:flex;}
+
+/* TOPBAR */
+.topbar{
+  height:52px;background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+  flex-shrink:0;
+}
+.topbar-logo{width:32px;height:32px;border-radius:50%;flex-shrink:0;}
+.topbar-brand{
+  font-family:var(--font-display);font-size:22px;letter-spacing:4px;
+  color:var(--accent);line-height:1;
+}
+.topbar-divider{width:1px;height:24px;background:var(--border);margin:0 4px;}
+.topbar-sub{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--text3);}
+.topbar-spacer{flex:1;}
+.topbar-pill{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--green);
+}
+.topbar-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+.topbar-clock{font-family:var(--font-mono);font-size:11px;color:var(--text2);text-align:right;line-height:1.4;}
+.topbar-user{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 12px;border:1px solid var(--border);
+  cursor:pointer;transition:all .2s;border-radius:var(--radius);
+  font-family:var(--font-mono);font-size:10px;
+}
+.topbar-user:hover{border-color:var(--accent);background:rgba(200,162,58,.05);}
+.topbar-user-rank{color:var(--accent);letter-spacing:2px;display:block;}
+.topbar-user-name{color:var(--text2);letter-spacing:1px;display:block;}
+.btn-logout{
+  padding:6px 12px;background:transparent;
+  border:1px solid rgba(224,80,80,.25);
+  color:var(--red);font-family:var(--font-mono);font-size:9px;letter-spacing:2px;
+  cursor:pointer;transition:all .2s;border-radius:var(--radius);
+}
+.btn-logout:hover{background:rgba(224,80,80,.1);border-color:var(--red);}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{
+  width:210px;background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;
+}
+.nav-group-lbl{
+  font-family:var(--font-mono);font-size:8px;letter-spacing:4px;
+  color:var(--text3);padding:18px 16px 6px;text-transform:uppercase;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;cursor:pointer;
+  font-family:var(--font-body);font-size:13px;font-weight:500;
+  color:var(--text2);border-left:2px solid transparent;
+  transition:all .15s;
+}
+.nav-item:hover{background:var(--bg3);color:var(--text);}
+.nav-item.active{background:rgba(200,162,58,.06);color:var(--accent);border-left-color:var(--accent);}
+.nav-ic{width:15px;height:15px;opacity:.6;flex-shrink:0;}
+.nav-item.active .nav-ic{opacity:1;}
+.nav-chip{
+  margin-left:auto;background:var(--accent);color:#000;
+  font-family:var(--font-mono);font-size:9px;padding:1px 6px;border-radius:10px;
+  font-weight:600;
+}
+.nav-chip.red{background:var(--red);color:#fff;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;background:var(--bg);}
+.page{display:none;padding:24px;}
+.page.active{display:block;}
+
+/* PAGE HEADER */
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.pg-title{font-family:var(--font-display);font-size:28px;letter-spacing:3px;color:var(--text);}
+.pg-crumb{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--text3);margin-top:2px;}
+.pg-crumb span{color:var(--cyan);}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border:none;cursor:pointer;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:2px;
+  transition:all .2s;border-radius:var(--radius);text-transform:uppercase;
+}
+.btn-gold{background:var(--accent);color:#000;font-weight:600;}
+.btn-gold:hover{background:var(--accent2);box-shadow:0 0 16px rgba(200,162,58,.25);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-outline:hover{border-color:var(--accent);color:var(--text);}
+.btn-red{background:rgba(224,80,80,.1);border:1px solid rgba(224,80,80,.2);color:var(--red);}
+.btn-red:hover{background:rgba(224,80,80,.2);}
+.btn-sm{padding:4px 10px;font-size:9px;}
+
+/* STATS GRID */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:18px;position:relative;overflow:hidden;
+  transition:all .2s;border-radius:var(--radius);
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.gold::before{background:var(--accent);}
+.stat-card.red::before{background:var(--red);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.blue::before{background:var(--blue);}
+.stat-card.cyan::before{background:var(--cyan);}
+.stat-card.orange::before{background:var(--orange);}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.stat-lbl{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text3);margin-bottom:8px;}
+.stat-val{font-family:var(--font-display);font-size:40px;color:var(--text);line-height:1;}
+.stat-sub{font-family:var(--font-mono);font-size:9px;color:var(--text3);margin-top:4px;}
+
+/* PANELS */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);}
+.panel-title{font-family:var(--font-mono);font-size:10px;letter-spacing:3px;color:var(--text2);text-transform:uppercase;}
+.panel-body{padding:0;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl thead tr{background:var(--bg3);border-bottom:1px solid var(--border2);}
+.tbl th{
+  padding:10px 14px;text-align:left;
+  font-family:var(--font-mono);font-size:8px;letter-spacing:3px;
+  color:var(--text3);text-transform:uppercase;cursor:pointer;white-space:nowrap;
+}
+.tbl th:hover{color:var(--accent);}
+.tbl tbody tr{border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer;}
+.tbl tbody tr:hover{background:var(--bg3);}
+.tbl td{padding:10px 14px;color:var(--text2);vertical-align:middle;}
+.tbl td.primary{color:var(--text);font-weight:600;}
+.tbl td.mono{font-family:var(--font-mono);font-size:11px;}
+.tbl td.accent{font-family:var(--font-mono);font-size:11px;color:var(--accent);}
+.tbl td.cyan{font-family:var(--font-mono);font-size:11px;color:var(--cyan);}
+.tbl td.red{font-family:var(--font-mono);font-size:11px;color:var(--red);}
+.tbl td.small{font-family:var(--font-mono);font-size:10px;color:var(--text3);}
+
+/* BADGES */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;
+  padding:2px 8px;border-radius:2px;text-transform:uppercase;white-space:nowrap;
+}
+.b-active{background:rgba(78,200,138,.12);color:var(--green);border:1px solid rgba(78,200,138,.2);}
+.b-closed{background:rgba(80,80,100,.15);color:var(--text3);border:1px solid var(--border);}
+.b-pending{background:rgba(200,162,58,.12);color:var(--accent);border:1px solid rgba(200,162,58,.2);}
+.b-critical{background:rgba(224,80,80,.12);color:var(--red);border:1px solid rgba(224,80,80,.2);}
+.b-wanted{background:rgba(224,80,80,.18);color:var(--red2);border:1px solid rgba(224,80,80,.3);}
+.b-blue{background:rgba(74,143,255,.12);color:var(--blue);border:1px solid rgba(74,143,255,.2);}
+.b-cyan{background:rgba(64,208,224,.12);color:var(--cyan);border:1px solid rgba(64,208,224,.2);}
+.b-orange{background:rgba(224,128,64,.12);color:var(--orange);border:1px solid rgba(224,128,64,.2);}
+.b-purple{background:rgba(144,96,208,.12);color:var(--purple);border:1px solid rgba(144,96,208,.2);}
+
+/* SEARCH BAR */
+.search-row{display:flex;gap:10px;margin-bottom:16px;align-items:center;}
+.search-wrap{position:relative;flex:1;}
+.search-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none;}
+.search-inp{
+  width:100%;background:var(--bg2);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-mono);font-size:12px;
+  padding:9px 12px 9px 34px;outline:none;transition:all .2s;border-radius:var(--radius);
+}
+.search-inp:focus{border-color:var(--accent);}
+.filter-sel{
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--text2);font-family:var(--font-mono);font-size:10px;
+  padding:8px 12px;outline:none;cursor:pointer;transition:all .2s;
+  border-radius:var(--radius);appearance:none;
+}
+.filter-sel:focus{border-color:var(--accent);}
+
+/* GRID 2 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+
+/* CLASSIFICATION BANNER */
+.cls-banner{
+  padding:10px 16px;border-radius:var(--radius);
+  display:flex;align-items:center;gap:10px;margin-bottom:18px;
+  background:rgba(224,80,80,.06);border:1px solid rgba(224,80,80,.15);
+  border-left:3px solid var(--red);
+}
+.cls-txt{font-family:var(--font-mono);font-size:9px;letter-spacing:3px;color:var(--red);}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-row-3{grid-template-columns:1fr 1fr 1fr;}
+.form-row-1{grid-template-columns:1fr;}
+.f-grp{margin-bottom:14px;}
+.f-lbl{display:block;font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;}
+.f-inp,.f-sel,.f-txt{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-body);font-size:13px;
+  padding:9px 12px;outline:none;transition:all .2s;border-radius:var(--radius);
+  appearance:none;
+}
+.f-inp:focus,.f-sel:focus,.f-txt:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,162,58,.07);}
+.f-txt{resize:vertical;min-height:70px;}
+
+/* IMAGE UPLOAD */
+.img-upload-zone{
+  border:2px dashed var(--border2);background:var(--bg3);
+  padding:20px;text-align:center;cursor:pointer;transition:all .2s;
+  border-radius:var(--radius);position:relative;
+}
+.img-upload-zone:hover{border-color:var(--accent);background:rgba(200,162,58,.03);}
+.img-upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-upload-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:var(--text3);}
+.img-preview-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.img-preview-item{position:relative;width:80px;height:80px;}
+.img-preview-item img{width:80px;height:80px;object-fit:cover;border:1px solid var(--border);border-radius:var(--radius);}
+.img-preview-item .img-del{
+  position:absolute;top:-4px;right:-4px;
+  width:18px;height:18px;background:var(--red);color:#fff;
+  border:none;border-radius:50%;cursor:pointer;font-size:10px;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.img-caption{font-family:var(--font-mono);font-size:9px;color:var(--text3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;margin-top:2px;}
+
+/* MODAL */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);
+  max-width:95vw;max-height:92vh;overflow-y:auto;width:680px;
+  border-radius:var(--radius);
+  animation:modalIn .2s ease;
+}
+.modal-lg{width:860px;}
+.modal-xl{width:1040px;}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--bg2);z-index:5;
+}
+.modal-title{font-family:var(--font-display);font-size:18px;letter-spacing:3px;color:var(--text);}
+.modal-close{
+  width:28px;height:28px;background:transparent;border:1px solid var(--border);
+  color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;border-radius:var(--radius);
+}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+.modal-body{padding:20px 22px;}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+
+/* DETAIL VIEW */
+.detail-section{background:var(--bg3);border:1px solid var(--border);padding:16px;border-radius:var(--radius);margin-bottom:14px;}
+.detail-stitle{font-family:var(--font-mono);font-size:9px;letter-spacing:3px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;}
+.detail-row{display:flex;padding:7px 0;border-bottom:1px solid rgba(42,42,53,.5);}
+.detail-row:last-child{border-bottom:none;}
+.detail-key{font-family:var(--font-mono);font-size:10px;color:var(--text3);width:140px;flex-shrink:0;padding-top:1px;letter-spacing:.5px;}
+.detail-val{font-size:13px;color:var(--text);flex:1;}
+
+/* LINK BADGE (suspect/case links) */
+.link-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--font-mono);font-size:10px;
+  color:var(--cyan);border-bottom:1px dotted rgba(64,208,224,.4);
+  cursor:pointer;transition:all .15s;
+}
+.link-badge:hover{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* COMMENT SECTION */
+.comment-section{margin-top:16px;}
+.comment-section-title{font-family:var(--font-mono);font-size:9px;letter-spacing:3px;color:var(--text3);margin-bottom:12px;}
+.comment-item{
+  background:var(--bg3);border:1px solid var(--border);
+  padding:12px 14px;border-radius:var(--radius);margin-bottom:8px;
+  animation:slideIn .2s ease;
+}
+.comment-meta{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.comment-author{font-family:var(--font-mono);font-size:10px;color:var(--accent);letter-spacing:1px;}
+.comment-time{font-family:var(--font-mono);font-size:9px;color:var(--text3);}
+.comment-text{font-size:13px;color:var(--text2);line-height:1.6;}
+.comment-del{margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;transition:color .15s;}
+.comment-del:hover{color:var(--red);}
+.comment-form{display:flex;gap:8px;margin-top:10px;}
+.comment-inp{
+  flex:1;background:var(--bg);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-body);font-size:13px;
+  padding:9px 12px;outline:none;transition:all .2s;border-radius:var(--radius);
+}
+.comment-inp:focus{border-color:var(--accent);}
+
+/* VEHICLE ITEM */
+.vehicle-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  padding:10px 14px;border-radius:var(--radius);margin-bottom:8px;
+}
+.vehicle-ic{font-size:20px;flex-shrink:0;}
+.vehicle-info{flex:1;}
+.vehicle-plate{font-family:var(--font-mono);font-size:12px;color:var(--accent);letter-spacing:2px;}
+.vehicle-desc{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* ACTIVITY */
+.act-item{display:flex;gap:12px;padding:10px 14px;border-bottom:1px solid rgba(42,42,53,.5);}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.act-body{flex:1;}
+.act-text{font-size:13px;color:var(--text);}
+.act-time{font-family:var(--font-mono);font-size:9px;color:var(--text3);margin-top:2px;}
+
+/* CONFIRM */
+.confirm-box{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.8);
+  align-items:center;justify-content:center;
+}
+.confirm-box.open{display:flex;}
+.confirm-inner{
+  background:var(--bg2);border:1px solid var(--red);
+  padding:28px 32px;width:360px;text-align:center;border-radius:var(--radius);
+  animation:modalIn .2s ease;
+}
+.confirm-inner h3{font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--red);margin-bottom:10px;}
+.confirm-inner p{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.confirm-btns{display:flex;gap:10px;justify-content:center;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:20px;right:20px;z-index:600;
+  background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--green);
+  padding:12px 18px;min-width:260px;
+  display:flex;align-items:center;gap:10px;
+  transform:translateX(120%);transition:transform .3s ease;
+  border-radius:var(--radius);
+}
+.toast.show{transform:translateX(0);}
+.toast.err{border-left-color:var(--red);}
+.toast-txt{font-size:13px;color:var(--text);}
+
+/* PERSONNEL GRID */
+.personnel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.person-card{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:20px;text-align:center;cursor:pointer;transition:all .2s;border-radius:var(--radius);
+}
+.person-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.person-av{
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--bg4),var(--bg5));
+  border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+  font-family:var(--font-display);font-size:20px;color:var(--accent);
+}
+.person-name{font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.person-rank{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:8px;}
+.person-meta{font-family:var(--font-mono);font-size:9px;color:var(--text3);line-height:1.8;}
+
+/* OVERVIEW HERO */
+.ov-hero{
+  background:var(--bg2);border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  padding:28px;margin-bottom:20px;
+  display:flex;gap:28px;border-radius:var(--radius);
+}
+.ov-logo{width:100px;height:100px;border-radius:50%;flex-shrink:0;}
+.ov-text-col{flex:1;}
+.ov-title{font-family:var(--font-display);font-size:32px;letter-spacing:4px;color:var(--accent);margin-bottom:4px;}
+.ov-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:3px;color:var(--text3);margin-bottom:14px;}
+.ov-desc{font-size:14px;color:var(--text2);line-height:1.7;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.tab{
+  padding:10px 18px;cursor:pointer;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:2px;
+  color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;
+}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* INFO CARD */
+.info-card{background:var(--bg3);border:1px solid var(--border);padding:18px;border-radius:var(--radius);}
+.info-card-title{font-family:var(--font-mono);font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:10px;}
+.info-list{list-style:none;}
+.info-list li{font-size:13px;color:var(--text2);padding:5px 0 5px 14px;position:relative;border-bottom:1px solid rgba(42,42,53,.5);}
+.info-list li::before{content:'›';position:absolute;left:0;color:var(--accent);}
+
+/* DASH GRID */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+/* TIMELINE */
+.timeline{padding-left:14px;}
+.tl-item{position:relative;padding:0 0 16px 20px;border-left:1px solid var(--border);}
+.tl-item:last-child{border-left-color:transparent;}
+.tl-dot{position:absolute;left:-5px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px rgba(74,143,255,.5);}
+.tl-date{font-family:var(--font-mono);font-size:9px;color:var(--text3);margin-bottom:3px;}
+.tl-text{font-size:13px;color:var(--text2);}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 20px;}
+.empty-txt{font-family:var(--font-mono);font-size:10px;letter-spacing:3px;color:var(--text3);}
+.empty-ic{font-size:36px;opacity:.15;margin-bottom:12px;}
+
+/* PRIORITY BADGE */
+.prio{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;padding:2px 6px;border-radius:2px;white-space:nowrap;}
+.prio-1{color:var(--red);background:rgba(224,80,80,.1);}
+.prio-2{color:var(--orange);background:rgba(224,128,64,.1);}
+.prio-3{color:var(--blue);background:rgba(74,143,255,.1);}
+.prio-4{color:var(--text3);background:var(--bg3);}
+
+/* AUDIT LOG */
+.audit-entry{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid rgba(42,42,53,.3);}
+.audit-time{font-family:var(--font-mono);font-size:9px;color:var(--text3);white-space:nowrap;}
+.audit-user{font-family:var(--font-mono);font-size:9px;color:var(--accent);white-space:nowrap;}
+.audit-msg{font-family:var(--font-mono);font-size:9px;color:var(--text2);}
+
+/* IMAGE GALLERY */
+.img-gallery{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.img-gal-item{position:relative;cursor:pointer;}
+.img-gal-item img{
+  width:90px;height:90px;object-fit:cover;
+  border:1px solid var(--border);border-radius:var(--radius);
+  transition:all .15s;
+}
+.img-gal-item img:hover{border-color:var(--accent);transform:scale(1.03);}
+.img-gal-lbl{font-family:var(--font-mono);font-size:8px;color:var(--text3);text-align:center;margin-top:3px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* LIGHTBOX */
+.lightbox{
+  display:none;position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.92);
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;
+}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:90vw;max-height:80vh;border:1px solid var(--border);border-radius:var(--radius);}
+.lightbox-cap{font-family:var(--font-mono);font-size:11px;color:var(--text2);}
+.lightbox-close{
+  position:absolute;top:20px;right:20px;
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--text);font-size:20px;width:36px;height:36px;
+  cursor:pointer;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
+}
+
+/* SEC DIV */
+.sec-div{display:flex;align-items:center;gap:12px;margin:20px 0 14px;}
+.sec-div-line{flex:1;height:1px;background:var(--border);}
+.sec-div-txt{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text3);}
+
+@media(max-width:1200px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .personnel-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================== LOGIN ======================== -->
+<div id="login-screen">
+  <div class="login-noise"></div>
+  <div class="login-lines"></div>
+  <div class="login-header">
+    <img src="LAPD_LOGO_PLACEHOLDER" class="login-logo" alt="LAPD" id="lapd-logo-login" onerror="this.style.display='none'"/>
+    <div class="login-dept">Los Angeles Police Department</div>
+    <div class="login-title">SIS</div>
+    <div class="login-sub">Special Investigation Section — Secure Database System</div>
+  </div>
+  <div class="login-box">
+    <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:3px;color:var(--text3);text-align:center;margin-bottom:20px;">AUTHENTICATE TO CONTINUE</div>
+    <label class="field-lbl">Badge Number</label>
+    <input class="field-inp" id="lg-user" placeholder="Enter badge number..." autocomplete="off"/>
+    <label class="field-lbl">Access Code</label>
+    <input class="field-inp" id="lg-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">AUTHENTICATE</button>
+    <div class="login-err" id="lg-err">⚠ ACCESS DENIED — INVALID CREDENTIALS</div>
+  </div>
+  <div class="login-warn">⚠ CLASSIFIED SYSTEM — UNAUTHORIZED ACCESS IS A FEDERAL OFFENSE</div>
+</div>
+
+<!-- ======================== APP ======================== -->
+<div id="app">
+  <div class="topbar">
+    <img id="lapd-logo-top" src="LAPD_LOGO_PLACEHOLDER" class="topbar-logo" alt="LAPD" onerror="this.style.display='none'"/>
+    <div class="topbar-brand">SIS</div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-sub">LAPD SPECIAL INVESTIGATION SECTION</div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-pill"><div class="topbar-dot"></div>ONLINE</div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-clock"><div id="tb-time">--:--:--</div><div id="tb-date" style="font-size:9px;color:var(--text3)"></div></div>
+    <div class="topbar-user" onclick="nav('admin')">
+      <span class="topbar-user-rank" id="tb-rank">—</span>
+      <span class="topbar-user-name" id="tb-name">—</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">LOGOUT</button>
+  </div>
+  <div class="app-body">
+    <nav class="sidebar">
+      <div class="nav-group-lbl">Main</div>
+      <div class="nav-item active" onclick="nav('dashboard')" data-page="dashboard">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="nav('overview')" data-page="overview">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Unit Overview
+      </div>
+      <div class="nav-group-lbl">Operations</div>
+      <div class="nav-item" onclick="nav('cases')" data-page="cases">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Cases <span class="nav-chip" id="nc-cases">0</span>
+      </div>
+      <div class="nav-item" onclick="nav('operations')" data-page="operations">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        Operations <span class="nav-chip" id="nc-ops">0</span>
+      </div>
+      <div class="nav-item" onclick="nav('surveillance')" data-page="surveillance">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Surveillance
+      </div>
+      <div class="nav-item" onclick="nav('suspects')" data-page="suspects">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Suspects <span class="nav-chip red" id="nc-sus">0</span>
+      </div>
+      <div class="nav-group-lbl">Intel</div>
+      <div class="nav-item" onclick="nav('evidence')" data-page="evidence">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Evidence Vault
+      </div>
+      <div class="nav-item" onclick="nav('reports')" data-page="reports">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reports
+      </div>
+      <div class="nav-group-lbl">Unit</div>
+      <div class="nav-item" onclick="nav('personnel')" data-page="personnel">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Personnel
+      </div>
+      <div class="nav-item" onclick="nav('equipment')" data-page="equipment">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M20 12h2M2 12h2M12 20v2"/></svg>
+        Equipment
+      </div>
+      <div class="nav-group-lbl" id="nav-admin-lbl" style="display:none;">Admin</div>
+      <div class="nav-item" id="nav-admin-item" style="display:none;" onclick="nav('admin')" data-page="admin">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin Panel
+      </div>
+    </nav>
+
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="pg-head">
+          <div><div class="pg-title">DASHBOARD</div><div class="pg-crumb">SIS / <span>COMMAND OVERVIEW</span></div></div>
+          <button class="btn btn-outline" onclick="refreshDash()">↺ REFRESH</button>
+        </div>
+        <div class="cls-banner"><span>⚠</span><div class="cls-txt">CLASSIFIED — LAW ENFORCEMENT SENSITIVE — UNAUTHORIZED DISCLOSURE IS A CRIMINAL OFFENSE</div></div>
+        <div class="stats-row">
+          <div class="stat-card gold"><div class="stat-lbl">Active Cases</div><div class="stat-val" id="s-cases">0</div><div class="stat-sub">Open Investigations</div></div>
+          <div class="stat-card red"><div class="stat-lbl">Critical Priority</div><div class="stat-val" id="s-crit">0</div><div class="stat-sub">P1 Cases</div></div>
+          <div class="stat-card green"><div class="stat-lbl">Active Suspects</div><div class="stat-val" id="s-sus">0</div><div class="stat-sub">Tracked Subjects</div></div>
+          <div class="stat-card blue"><div class="stat-lbl">Operations</div><div class="stat-val" id="s-ops">0</div><div class="stat-sub">Total Logged</div></div>
+          <div class="stat-card cyan"><div class="stat-lbl">Evidence Items</div><div class="stat-val" id="s-ev">0</div><div class="stat-sub">In Vault</div></div>
+          <div class="stat-card orange"><div class="stat-lbl">Reports Filed</div><div class="stat-val" id="s-rpts">0</div><div class="stat-sub">On Record</div></div>
+          <div class="stat-card gold"><div class="stat-lbl">Personnel</div><div class="stat-val" id="s-per">0</div><div class="stat-sub">Active Officers</div></div>
+          <div class="stat-card green"><div class="stat-lbl">Closed Cases</div><div class="stat-val" id="s-cls">0</div><div class="stat-sub">Resolved</div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">Recent Activity</div><button class="btn btn-outline btn-sm" onclick="clearActivity()">Clear</button></div>
+            <div id="dash-activity" style="max-height:240px;overflow-y:auto;"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">Active Alerts</div></div>
+            <div id="dash-alerts" style="max-height:240px;overflow-y:auto;"></div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">Recent Cases</div><button class="btn btn-outline btn-sm" onclick="nav('cases')">View All</button></div>
+            <div id="dash-cases" style="max-height:220px;overflow-y:auto;"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">Recent Operations</div><button class="btn btn-outline btn-sm" onclick="nav('operations')">View All</button></div>
+            <div id="dash-ops" style="max-height:220px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UNIT OVERVIEW -->
+      <div class="page" id="page-overview">
+        <div class="pg-head"><div><div class="pg-title">UNIT OVERVIEW</div><div class="pg-crumb">SIS / <span>ABOUT THE UNIT</span></div></div></div>
+        <div class="ov-hero">
+          <img id="lapd-logo-ov" src="LAPD_LOGO_PLACEHOLDER" class="ov-logo" alt="LAPD" onerror="this.style.display='none'"/>
+          <div class="ov-text-col">
+            <div class="ov-title">Special Investigation Section</div>
+            <div class="ov-sub">LOS ANGELES POLICE DEPARTMENT — DETECTIVE BUREAU — EST. 1965</div>
+            <div class="ov-desc">The Special Investigation Section (SIS) is an elite plainclothes detective unit within the LAPD Detective Bureau. Operating under strict confidentiality, SIS specializes in long-term covert surveillance of career criminals, gathering evidence for successful prosecution of major crimes including homicide, robbery, narcotics trafficking, and organized crime. SIS detectives maintain extended surveillance on subjects—sometimes for weeks or months—building comprehensive criminal cases. The unit is known for its high-risk operations and has been instrumental in apprehending Los Angeles' most dangerous career criminals.</div>
+          </div>
+        </div>
+        <div class="tabs" id="ov-tabs">
+          <div class="tab active" onclick="ovTab(0)">Mission</div>
+          <div class="tab" onclick="ovTab(1)">Capabilities</div>
+          <div class="tab" onclick="ovTab(2)">Protocols</div>
+          <div class="tab" onclick="ovTab(3)">History</div>
+        </div>
+        <div id="ov-tab-0">
+          <div class="grid3">
+            <div class="info-card"><div class="info-card-title">Primary Mission</div><ul class="info-list"><li>Long-term covert surveillance of career criminals</li><li>Building comprehensive prosecutable cases</li><li>Monitoring habitual violent offenders</li><li>Intelligence gathering on criminal enterprises</li><li>Inter-agency coordination</li></ul></div>
+            <div class="info-card"><div class="info-card-title">Crime Types</div><ul class="info-list"><li>Armed robbery and home invasion</li><li>Homicide and violent crime</li><li>Narcotics trafficking</li><li>Organized crime & gang operations</li><li>Kidnapping and extortion</li></ul></div>
+            <div class="info-card"><div class="info-card-title">Parameters</div><ul class="info-list"><li>24/7 operational capability</li><li>Citywide jurisdiction</li><li>Plainclothes & undercover ops</li><li>Inter-agency coordination authorized</li><li>Strict chain of custody protocols</li></ul></div>
+          </div>
+        </div>
+        <div id="ov-tab-1" style="display:none;"><div class="grid3"><div class="info-card"><div class="info-card-title">Surveillance</div><ul class="info-list"><li>Mobile & static surveillance teams</li><li>Technical surveillance equipment</li><li>Aerial coordination</li><li>Electronic monitoring (authorized)</li><li>Undercover support</li></ul></div><div class="info-card"><div class="info-card-title">Investigative Tools</div><ul class="info-list"><li>Criminal history analysis</li><li>Confidential informant network</li><li>FBI/DEA database access</li><li>Forensic support</li><li>Wiretap (court-authorized)</li></ul></div><div class="info-card"><div class="info-card-title">Tactical Assets</div><ul class="info-list"><li>Unmarked vehicle fleet</li><li>Body armor & tactical gear</li><li>Long-range observation equipment</li><li>Night vision & thermal imaging</li><li>Rapid deployment capability</li></ul></div></div></div>
+        <div id="ov-tab-2" style="display:none;"><div class="grid3"><div class="info-card"><div class="info-card-title">Use of Force</div><ul class="info-list"><li>Adhere to LAPD Use of Force Policy</li><li>Minimum force necessary</li><li>Supervisor notification on any force</li><li>Mandatory documentation 24hr</li><li>FID notification on critical incidents</li></ul></div><div class="info-card"><div class="info-card-title">Evidence Handling</div><ul class="info-list"><li>Strict chain of custody maintained</li><li>All evidence logged in SIS vault</li><li>Dual-officer verification required</li><li>Digital evidence: forensic protocols</li><li>Regular inventory audits</li></ul></div><div class="info-card"><div class="info-card-title">OPSEC</div><ul class="info-list"><li>Need-to-know sharing only</li><li>Cover identity protocols</li><li>No social media disclosure</li><li>Secure communications mandatory</li><li>Counter-surveillance required</li></ul></div></div></div>
+        <div id="ov-tab-3" style="display:none;"><div class="detail-section"><div class="detail-stitle">Unit History</div><div class="timeline"><div class="tl-item"><div class="tl-dot"></div><div class="tl-date">1965</div><div class="tl-text">SIS established within LAPD Detective Bureau to address increasing career criminal activity in Los Angeles.</div></div><div class="tl-item"><div class="tl-dot"></div><div class="tl-date">1970s</div><div class="tl-text">Unit expanded to address organized crime. Interagency cooperation established with FBI and DEA.</div></div><div class="tl-item"><div class="tl-dot"></div><div class="tl-date">1980s</div><div class="tl-text">Peak operational years during LA gang crisis. SIS played major role in combating violent career offenders.</div></div><div class="tl-item"><div class="tl-dot"></div><div class="tl-date">1990s</div><div class="tl-text">Enhanced oversight protocols. Unit restructured to align with evolving LAPD accountability standards.</div></div><div class="tl-item"><div class="tl-dot" style="background:var(--accent)"></div><div class="tl-date">Present</div><div class="tl-text">SIS continues as one of LAPD's premier specialized investigative units, focusing on career violent offenders and organized crime.</div></div></div></div></div>
+      </div>
+
+      <!-- CASES -->
+      <div class="page" id="page-cases">
+        <div class="pg-head"><div><div class="pg-title">CASE FILES</div><div class="pg-crumb">SIS / <span>CASES</span></div></div><button class="btn btn-gold" onclick="openModal('new-case')">+ NEW CASE</button></div>
+        <div class="search-row">
+          <div class="search-wrap"><span class="search-ic">⌕</span><input class="search-inp" placeholder="Search case number, title, suspect, location..." oninput="filterTbl('cases-tbl',this.value)"/></div>
+          <select class="filter-sel" onchange="filterTbl('cases-tbl',this.value)"><option value="">All Status</option><option>active</option><option>critical</option><option>pending</option><option>closed</option></select>
+          <select class="filter-sel" onchange="filterTbl('cases-tbl',this.value)"><option value="">All Types</option><option>Homicide</option><option>Robbery</option><option>Narcotics</option><option>Surveillance</option><option>Organized Crime</option></select>
+        </div>
+        <div class="tbl-wrap"><table class="tbl" id="cases-tbl"><thead><tr><th>CASE #</th><th>TITLE</th><th>TYPE</th><th>STATUS</th><th>PRIORITY</th><th>DETECTIVE</th><th>DATE</th><th>SUSPECTS</th><th>ACTIONS</th></tr></thead><tbody id="cases-tbody"></tbody></table></div>
+      </div>
+
+      <!-- OPERATIONS -->
+      <div class="page" id="page-operations">
+        <div class="pg-head"><div><div class="pg-title">OPERATIONS</div><div class="pg-crumb">SIS / <span>OPERATIONS LOG</span></div></div><button class="btn btn-gold" onclick="openModal('new-op')">+ NEW OPERATION</button></div>
+        <div class="search-row">
+          <div class="search-wrap"><span class="search-ic">⌕</span><input class="search-inp" placeholder="Search operation code, name, location..." oninput="filterTbl('ops-tbl',this.value)"/></div>
+          <select class="filter-sel" onchange="filterTbl('ops-tbl',this.value)"><option value="">All Status</option><option>planned</option><option>active</option><option>completed</option><option>aborted</option></select>
+        </div>
+        <div class="tbl-wrap"><table class="tbl" id="ops-tbl"><thead><tr><th>OP CODE</th><th>NAME</th><th>TYPE</th><th>STATUS</th><th>LINKED CASE</th><th>LOCATION</th><th>DATE</th><th>LEAD</th><th>ACTIONS</th></tr></thead><tbody id="ops-tbody"></tbody></table></div>
+      </div>
+
+      <!-- SURVEILLANCE -->
+      <div class="page" id="page-surveillance">
+        <div class="pg-head"><div><div class="pg-title">SURVEILLANCE LOGS</div><div class="pg-crumb">SIS / <span>SURVEILLANCE</span></div></div><button class="btn btn-gold" onclick="openModal('new-surv')">+ LOG SURVEILLANCE</button></div>
+        <div class="search-row"><div class="search-wrap"><span class="search-ic">⌕</span><input class="search-inp" placeholder="Search subject, location, team..." oninput="filterTbl('surv-tbl',this.value)"/></div></div>
+        <div class="tbl-wrap"><table class="tbl" id="surv-tbl"><thead><tr><th>LOG ID</th><th>SUBJECT</th><th>LOCATION</th><th>START</th><th>DURATION</th><th>TEAM</th><th>CASE #</th><th>MEDIA</th><th>ACTIONS</th></tr></thead><tbody id="surv-tbody"></tbody></table></div>
+      </div>
+
+      <!-- SUSPECTS -->
+      <div class="page" id="page-suspects">
+        <div class="pg-head"><div><div class="pg-title">SUSPECTS / TARGETS</div><div class="pg-crumb">SIS / <span>SUBJECT DATABASE</span></div></div><button class="btn btn-gold" onclick="openModal('new-suspect')">+ ADD SUBJECT</button></div>
+        <div class="search-row">
+          <div class="search-wrap"><span class="search-ic">⌕</span><input class="search-inp" placeholder="Search name, alias, DOB, MO..." oninput="filterTbl('sus-tbl',this.value)"/></div>
+          <select class="filter-sel" onchange="filterTbl('sus-tbl',this.value)"><option value="">All Threat Levels</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select>
+        </div>
+        <div class="tbl-wrap"><table class="tbl" id="sus-tbl"><thead><tr><th>ID</th><th>PHOTO</th><th>NAME</th><th>ALIAS</th><th>DOB</th><th>THREAT</th><th>STATUS</th><th>LINKED CASE</th><th>ACTIONS</th></tr></thead><tbody id="sus-tbody"></tbody></table></div>
+      </div>
+
+      <!-- EVIDENCE -->
+      <div class="page" id="page-evidence">
+        <div class="pg-head"><div><div class="pg-title">EVIDENCE VAULT</div><div class="pg-crumb">SIS / <span>EVIDENCE</span></div></div><button class="btn btn-gold" onclick="openModal('new-ev')">+ LOG EVIDENCE</button></div>
+        <div class="search-row">
+          <div class="search-wrap"><span class="search-ic">⌕</span><input class="search-inp" placeholder="Search item, case #, type..." oninput="filterTbl('ev-tbl',this.value)"/></div>
+          <select class="filter-sel" onchange="filterTbl('ev-tbl',this.value)"><option value="">All Types</option><option>FIREARM</option><option>NARCOTICS</option><option>DIGITAL</option><option>DOCUMENTS</option><option>PHYSICAL</option><option>VEHICLE</option><option>CURRENCY</option></select>
+        </div>
+        <div class="tbl-wrap"><table class="tbl" id="ev-tbl"><thead><tr><th>EVIDENCE #</th><th>PHOTO</th><th>DESCRIPTION</th><th>TYPE</th><th>CASE #</th><th>COLLECTED BY</th><th>DATE</th><th>STORAGE</th><th>ACTIONS</th></tr></thead><tbody id="ev-tbody"></tbody></table></div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="pg-head"><div><div class="pg-title">INCIDENT REPORTS</div><div class="pg-crumb">SIS / <span>REPORTS</span></div></div><button class="btn btn-gold" onclick="openModal('new-rpt')">+ FILE REPORT</button></div>
+        <div class="tbl-wrap"><table class="tbl" id="rpt-tbl"><thead><tr><th>REPORT #</th><th>TITLE</th><th>TYPE</th><th>CASE #</th><th>AUTHOR</th><th>DATE</th><th>CLASS</th><th>ACTIONS</th></tr></thead><tbody id="rpt-tbody"></tbody></table></div>
+      </div>
+
+      <!-- PERSONNEL -->
+      <div class="page" id="page-personnel">
+        <div class="pg-head"><div><div class="pg-title">PERSONNEL</div><div class="pg-crumb">SIS / <span>UNIT PERSONNEL</span></div></div><button class="btn btn-gold" id="btn-add-per" style="display:none;" onclick="openModal('new-per')">+ ADD OFFICER</button></div>
+        <div class="personnel-grid" id="per-grid"></div>
+      </div>
+
+      <!-- EQUIPMENT -->
+      <div class="page" id="page-equipment">
+        <div class="pg-head"><div><div class="pg-title">EQUIPMENT</div><div class="pg-crumb">SIS / <span>EQUIPMENT REGISTRY</span></div></div><button class="btn btn-gold" onclick="openModal('new-eq')">+ LOG EQUIPMENT</button></div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>ITEM #</th><th>DESCRIPTION</th><th>CATEGORY</th><th>SERIAL #</th><th>ASSIGNED</th><th>STATUS</th><th>CONDITION</th><th>ACTIONS</th></tr></thead><tbody id="eq-tbody"></tbody></table></div>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="page" id="page-admin">
+        <div class="pg-head"><div><div class="pg-title">ADMIN PANEL</div><div class="pg-crumb">SIS / <span>ADMINISTRATION</span></div></div></div>
+        <div class="cls-banner" style="border-left-color:var(--accent);background:rgba(200,162,58,.04);"><span>★</span><div class="cls-txt" style="color:var(--accent);">COMMAND LEVEL — ADMIN FUNCTIONS — ALL ACTIONS ARE LOGGED</div></div>
+        <div class="grid2" style="margin-bottom:16px;">
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">User Management</div></div>
+            <div style="padding:14px;">
+              <button class="btn btn-gold" style="width:100%;margin-bottom:12px;" onclick="openModal('new-user')">+ CREATE USER ACCOUNT</button>
+              <div class="tbl-wrap"><table class="tbl"><thead><tr><th>BADGE</th><th>NAME</th><th>RANK</th><th>ACCESS</th><th>ACTIONS</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div class="panel-title">System Settings</div></div>
+            <div style="padding:14px;">
+              <div class="f-grp"><label class="f-lbl">Unit Designation</label><input class="f-inp" value="Special Investigation Section (SIS)" readonly/></div>
+              <div class="f-grp"><label class="f-lbl">Commanding Officer</label><input class="f-inp" id="sys-co" placeholder="Enter CO name..."/></div>
+              <div class="f-grp"><label class="f-lbl">Alert Level</label><select class="f-sel" id="sys-al"><option>ROUTINE</option><option>ELEVATED</option><option selected>HIGH ALERT</option><option>CRITICAL</option></select></div>
+              <button class="btn btn-gold" style="width:100%;" onclick="saveSysSettings()">SAVE SETTINGS</button>
+              <div class="sec-div"><div class="sec-div-line"></div><div class="sec-div-txt">DATA MANAGEMENT</div><div class="sec-div-line"></div></div>
+              <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="exportDB()">⬇ EXPORT DATABASE</button>
+              <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="document.getElementById('imp-file').click()">⬆ IMPORT DATABASE</button>
+              <button class="btn btn-red" style="width:100%;" onclick="confirmAct('Clear ALL records? This is irreversible.',clearAll)">⚠ CLEAR ALL RECORDS</button>
+              <input type="file" id="imp-file" accept=".json" style="display:none;" onchange="importDB(event)"/>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">System Audit Log</div><button class="btn btn-outline btn-sm" onclick="confirmAct('Clear audit log?',clearAudit)">Clear</button></div>
+          <div id="audit-log" style="padding:12px;max-height:300px;overflow-y:auto;font-family:var(--font-mono);font-size:10px;"></div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app-body -->
+</div><!-- /app -->
+
+<!-- ======================== MODALS ======================== -->
+
+<!-- NEW CASE -->
+<div class="modal-overlay" id="modal-new-case">
+  <div class="modal modal-lg">
+    <div class="modal-head"><div class="modal-title">NEW CASE FILE</div><button class="modal-close" onclick="closeModal('new-case')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Case Number *</label><input class="f-inp" id="c-num" placeholder="SIS-2024-0001"/></div><div class="f-grp"><label class="f-lbl">Case Title *</label><input class="f-inp" id="c-title" placeholder="Brief title..."/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Crime Type *</label><select class="f-sel" id="c-type"><option>Homicide</option><option>Robbery</option><option>Narcotics</option><option>Surveillance</option><option>Organized Crime</option><option>Kidnapping</option><option>Extortion</option><option>Carjacking</option><option>Gang Related</option><option>Other</option></select></div><div class="f-grp"><label class="f-lbl">Priority *</label><select class="f-sel" id="c-prio"><option value="1">P1 — CRITICAL</option><option value="2">P2 — HIGH</option><option value="3" selected>P3 — MEDIUM</option><option value="4">P4 — LOW</option></select></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Lead Detective *</label><input class="f-inp" id="c-det" placeholder="Det. Name, Badge #"/></div><div class="f-grp"><label class="f-lbl">Date Opened</label><input class="f-inp" id="c-date" type="date"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Incident Location</label><input class="f-inp" id="c-loc" placeholder="Address / area, Los Angeles, CA"/></div><div class="f-grp"><label class="f-lbl">Status</label><select class="f-sel" id="c-status"><option value="active">ACTIVE</option><option value="critical">CRITICAL</option><option value="pending">PENDING</option><option value="closed">CLOSED</option></select></div></div>
+      <div class="f-grp"><label class="f-lbl">Primary Suspects</label><input class="f-inp" id="c-suspects" placeholder="Names separated by commas (will be linked if matched in Suspects DB)"/></div>
+      <div class="f-grp"><label class="f-lbl">Case Summary *</label><textarea class="f-txt" id="c-summary" rows="4" placeholder="Detailed case description, background, investigation objectives..."></textarea></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Classification</label><select class="f-sel" id="c-class"><option>LAW ENFORCEMENT SENSITIVE</option><option>CONFIDENTIAL</option><option>RESTRICTED</option></select></div><div class="f-grp"><label class="f-lbl">Initial Notes</label><input class="f-inp" id="c-notes" placeholder="Witness statements, scene observations..."/></div></div>
+      <div class="f-grp"><label class="f-lbl">Case Photos / Media</label><div class="img-upload-zone" id="case-img-zone"><input type="file" accept="image/*" multiple onchange="handleImgUpload('case-imgs',this)"/><div class="img-upload-lbl">📁 CLICK TO UPLOAD PHOTOS / IMAGES</div></div><div class="img-preview-grid" id="case-imgs"></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-case')">CANCEL</button><button class="btn btn-gold" onclick="saveCase()">FILE CASE</button></div>
+  </div>
+</div>
+
+<!-- NEW OPERATION -->
+<div class="modal-overlay" id="modal-new-op">
+  <div class="modal modal-lg">
+    <div class="modal-head"><div class="modal-title">LOG OPERATION</div><button class="modal-close" onclick="closeModal('new-op')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Op Code *</label><input class="f-inp" id="o-code" placeholder="OP-NIGHTHAWK-01"/></div><div class="f-grp"><label class="f-lbl">Operation Name *</label><input class="f-inp" id="o-name" placeholder="Operation name..."/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Type</label><select class="f-sel" id="o-type"><option>Surveillance</option><option>Arrest</option><option>Raid</option><option>Undercover</option><option>Sting</option><option>Search & Seizure</option><option>Stake-Out</option><option>Other</option></select></div><div class="f-grp"><label class="f-lbl">Status</label><select class="f-sel" id="o-status"><option value="planned">PLANNED</option><option value="active">ACTIVE</option><option value="completed">COMPLETED</option><option value="aborted">ABORTED</option></select></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Linked Case #</label><input class="f-inp" id="o-case" placeholder="Case number (optional)"/></div><div class="f-grp"><label class="f-lbl">Team Leader</label><input class="f-inp" id="o-lead" placeholder="Det. Name, Badge #"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Location</label><input class="f-inp" id="o-loc" placeholder="Address or area..."/></div><div class="f-grp"><label class="f-lbl">Date / Time</label><input class="f-inp" id="o-date" type="datetime-local"/></div></div>
+      <div class="f-grp"><label class="f-lbl">Team Members</label><input class="f-inp" id="o-team" placeholder="Officer names and badge numbers..."/></div>
+      <div class="f-grp"><label class="f-lbl">Objective / Brief</label><textarea class="f-txt" id="o-obj" rows="3" placeholder="Operational objective, target, tactical plan..."></textarea></div>
+      <div class="f-grp"><label class="f-lbl">Outcome / Notes</label><textarea class="f-txt" id="o-out" rows="3" placeholder="Results, arrests made, evidence seized..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-op')">CANCEL</button><button class="btn btn-gold" onclick="saveOp()">LOG OPERATION</button></div>
+  </div>
+</div>
+
+<!-- NEW SURVEILLANCE -->
+<div class="modal-overlay" id="modal-new-surv">
+  <div class="modal modal-lg">
+    <div class="modal-head"><div class="modal-title">LOG SURVEILLANCE</div><button class="modal-close" onclick="closeModal('new-surv')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Log ID *</label><input class="f-inp" id="sv-id" placeholder="SURV-2024-0001"/></div><div class="f-grp"><label class="f-lbl">Subject / Target *</label><input class="f-inp" id="sv-sub" placeholder="Full name or alias"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Location *</label><input class="f-inp" id="sv-loc" placeholder="Address, intersection..."/></div><div class="f-grp"><label class="f-lbl">Linked Case #</label><input class="f-inp" id="sv-case" placeholder="Case #"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Start Date/Time</label><input class="f-inp" id="sv-start" type="datetime-local"/></div><div class="f-grp"><label class="f-lbl">End Date/Time</label><input class="f-inp" id="sv-end" type="datetime-local"/></div></div>
+      <div class="f-grp"><label class="f-lbl">Surveillance Team</label><input class="f-inp" id="sv-team" placeholder="Officer names..."/></div>
+      <div class="f-grp"><label class="f-lbl">Vehicles / Equipment</label><input class="f-inp" id="sv-veh" placeholder="Vehicle descriptions, equipment used..."/></div>
+      <div class="f-grp"><label class="f-lbl">Notable Activity / Observations *</label><textarea class="f-txt" id="sv-act" rows="4" placeholder="Subject movements, contacts, vehicles, locations visited, any criminal activity observed..."></textarea></div>
+      <div class="f-grp"><label class="f-lbl">Media Obtained</label><select class="f-sel" id="sv-media"><option>None</option><option>Photos Only</option><option>Video Only</option><option>Photos & Video</option><option>Classified Media</option></select></div>
+      <div class="f-grp"><label class="f-lbl">Surveillance Photos</label><div class="img-upload-zone"><input type="file" accept="image/*" multiple onchange="handleImgUpload('surv-imgs',this)"/><div class="img-upload-lbl">📸 UPLOAD SURVEILLANCE PHOTOS</div></div><div class="img-preview-grid" id="surv-imgs"></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-surv')">CANCEL</button><button class="btn btn-gold" onclick="saveSurv()">LOG SURVEILLANCE</button></div>
+  </div>
+</div>
+
+<!-- NEW SUSPECT -->
+<div class="modal-overlay" id="modal-new-suspect">
+  <div class="modal modal-xl">
+    <div class="modal-head"><div class="modal-title">ADD SUBJECT / SUSPECT</div><button class="modal-close" onclick="closeModal('new-suspect')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Subject ID *</label><input class="f-inp" id="ss-id" placeholder="SBJ-2024-0001"/></div><div class="f-grp"><label class="f-lbl">Full Legal Name *</label><input class="f-inp" id="ss-name" placeholder="Last, First Middle"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Known Aliases</label><input class="f-inp" id="ss-alias" placeholder="Nickname, street name, AKA..."/></div><div class="f-grp"><label class="f-lbl">Date of Birth</label><input class="f-inp" id="ss-dob" type="date"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Race / Sex</label><input class="f-inp" id="ss-desc" placeholder="e.g. BM, WF, HM..."/></div><div class="f-grp"><label class="f-lbl">Height / Weight</label><input class="f-inp" id="ss-hw" placeholder="5'11&quot; / 175 lbs"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Last Known Address</label><input class="f-inp" id="ss-addr" placeholder="Address, LA, CA"/></div><div class="f-grp"><label class="f-lbl">Linked Case #</label><input class="f-inp" id="ss-case" placeholder="Case number"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Threat Level</label><select class="f-sel" id="ss-threat"><option value="critical">CRITICAL — ARMED & DANGEROUS</option><option value="high">HIGH</option><option value="medium" selected>MEDIUM</option><option value="low">LOW</option></select></div><div class="f-grp"><label class="f-lbl">Status</label><select class="f-sel" id="ss-status"><option value="active">ACTIVE SURVEILLANCE</option><option value="wanted">WANTED</option><option value="arrested">ARRESTED</option><option value="convicted">CONVICTED</option><option value="cleared">CLEARED</option></select></div></div>
+      <div class="f-grp"><label class="f-lbl">Criminal History / MO</label><textarea class="f-txt" id="ss-hist" rows="3" placeholder="Prior arrests, convictions, known MO, gang affiliations..."></textarea></div>
+      <div class="f-grp"><label class="f-lbl">Physical Description / Identifying Marks</label><textarea class="f-txt" id="ss-marks" rows="2" placeholder="Tattoos, scars, hair color, eye color, build..."></textarea></div>
+
+      <div class="sec-div"><div class="sec-div-line"></div><div class="sec-div-txt">SUBJECT PHOTOS</div><div class="sec-div-line"></div></div>
+      <div class="f-grp"><label class="f-lbl">Subject Photos (Mugshot, Surveillance, etc.)</label><div class="img-upload-zone"><input type="file" accept="image/*" multiple onchange="handleImgUpload('sus-imgs',this)"/><div class="img-upload-lbl">🪪 UPLOAD SUBJECT PHOTOS</div></div><div class="img-preview-grid" id="sus-imgs"></div></div>
+
+      <div class="sec-div"><div class="sec-div-line"></div><div class="sec-div-txt">ASSOCIATED VEHICLES</div><div class="sec-div-line"></div></div>
+      <div id="veh-list"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input class="f-inp" id="veh-plate" placeholder="License plate..." style="flex:1;"/>
+        <input class="f-inp" id="veh-desc" placeholder="Make, model, color, year..." style="flex:2;"/>
+        <button class="btn btn-outline" onclick="addVehicle()">+ ADD</button>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-suspect')">CANCEL</button><button class="btn btn-gold" onclick="saveSuspect()">ADD SUBJECT</button></div>
+  </div>
+</div>
+
+<!-- NEW EVIDENCE -->
+<div class="modal-overlay" id="modal-new-ev">
+  <div class="modal modal-lg">
+    <div class="modal-head"><div class="modal-title">LOG EVIDENCE</div><button class="modal-close" onclick="closeModal('new-ev')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Evidence # *</label><input class="f-inp" id="ev-id" placeholder="EV-2024-0001"/></div><div class="f-grp"><label class="f-lbl">Type</label><select class="f-sel" id="ev-type"><option>FIREARM</option><option>NARCOTICS</option><option>DIGITAL</option><option>DOCUMENTS</option><option>PHYSICAL</option><option>VEHICLE</option><option>CURRENCY</option><option>CLOTHING</option><option>BIOLOGICAL</option></select></div></div>
+      <div class="f-grp"><label class="f-lbl">Description *</label><input class="f-inp" id="ev-desc" placeholder="Detailed item description..."/></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Linked Case #</label><input class="f-inp" id="ev-case" placeholder="Case #"/></div><div class="f-grp"><label class="f-lbl">Collected By</label><input class="f-inp" id="ev-off" placeholder="Officer name, badge #"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Date / Time Collected</label><input class="f-inp" id="ev-date" type="datetime-local"/></div><div class="f-grp"><label class="f-lbl">Collection Location</label><input class="f-inp" id="ev-loc" placeholder="Address / scene location"/></div></div>
+      <div class="f-grp"><label class="f-lbl">Storage Location</label><input class="f-inp" id="ev-stor" placeholder="Evidence room, locker #..."/></div>
+      <div class="f-grp"><label class="f-lbl">Chain of Custody Notes</label><textarea class="f-txt" id="ev-chain" rows="2" placeholder="Handling notes, transfer log..."></textarea></div>
+      <div class="f-grp"><label class="f-lbl">Evidence Photos</label><div class="img-upload-zone"><input type="file" accept="image/*" multiple onchange="handleImgUpload('ev-imgs',this)"/><div class="img-upload-lbl">📦 UPLOAD EVIDENCE PHOTOS</div></div><div class="img-preview-grid" id="ev-imgs"></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-ev')">CANCEL</button><button class="btn btn-gold" onclick="saveEv()">LOG EVIDENCE</button></div>
+  </div>
+</div>
+
+<!-- NEW REPORT -->
+<div class="modal-overlay" id="modal-new-rpt">
+  <div class="modal modal-lg">
+    <div class="modal-head"><div class="modal-title">FILE REPORT</div><button class="modal-close" onclick="closeModal('new-rpt')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Report # *</label><input class="f-inp" id="r-id" placeholder="RPT-2024-0001"/></div><div class="f-grp"><label class="f-lbl">Title *</label><input class="f-inp" id="r-title" placeholder="Brief title..."/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Type</label><select class="f-sel" id="r-type"><option>Incident Report</option><option>Use of Force Report</option><option>Surveillance Report</option><option>Arrest Report</option><option>Evidence Report</option><option>Intelligence Report</option><option>After-Action Report</option></select></div><div class="f-grp"><label class="f-lbl">Classification</label><select class="f-sel" id="r-class"><option>LAW ENFORCEMENT SENSITIVE</option><option>CONFIDENTIAL</option><option>RESTRICTED</option></select></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Linked Case #</label><input class="f-inp" id="r-case" placeholder="Case number"/></div><div class="f-grp"><label class="f-lbl">Authored By</label><input class="f-inp" id="r-auth" placeholder="Det. Name, Badge #"/></div></div>
+      <div class="f-grp"><label class="f-lbl">Date Filed</label><input class="f-inp" id="r-date" type="date"/></div>
+      <div class="f-grp"><label class="f-lbl">Report Narrative *</label><textarea class="f-txt" id="r-narr" rows="8" placeholder="Full incident narrative, observations, actions taken, outcomes, recommendations..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-rpt')">CANCEL</button><button class="btn btn-gold" onclick="saveRpt()">FILE REPORT</button></div>
+  </div>
+</div>
+
+<!-- NEW PERSONNEL -->
+<div class="modal-overlay" id="modal-new-per">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">ADD OFFICER</div><button class="modal-close" onclick="closeModal('new-per')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Full Name *</label><input class="f-inp" id="p-name" placeholder="Last, First"/></div><div class="f-grp"><label class="f-lbl">Badge # *</label><input class="f-inp" id="p-badge" placeholder="#12345"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Rank</label><select class="f-sel" id="p-rank"><option>Detective</option><option>Detective II</option><option>Detective III</option><option>Sergeant</option><option>Lieutenant</option><option>Captain</option></select></div><div class="f-grp"><label class="f-lbl">Specialization</label><input class="f-inp" id="p-spec" placeholder="Surveillance, Narcotics..."/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Status</label><select class="f-sel" id="p-status"><option value="active">ACTIVE DUTY</option><option value="admin">ADMINISTRATIVE</option><option value="leave">ON LEAVE</option></select></div><div class="f-grp"><label class="f-lbl">Years of Service</label><input class="f-inp" id="p-yrs" type="number" placeholder="8"/></div></div>
+      <div class="f-grp"><label class="f-lbl">Notes</label><textarea class="f-txt" id="p-notes" rows="2" placeholder="Certifications, clearances..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-per')">CANCEL</button><button class="btn btn-gold" onclick="savePer()">ADD OFFICER</button></div>
+  </div>
+</div>
+
+<!-- NEW EQUIPMENT -->
+<div class="modal-overlay" id="modal-new-eq">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">LOG EQUIPMENT</div><button class="modal-close" onclick="closeModal('new-eq')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Item # *</label><input class="f-inp" id="eq-id" placeholder="EQ-2024-0001"/></div><div class="f-grp"><label class="f-lbl">Description *</label><input class="f-inp" id="eq-desc" placeholder="Item description..."/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Category</label><select class="f-sel" id="eq-cat"><option>Firearms</option><option>Vehicles</option><option>Surveillance</option><option>Communications</option><option>Tactical</option><option>Digital/Tech</option><option>Body Armor</option></select></div><div class="f-grp"><label class="f-lbl">Serial #</label><input class="f-inp" id="eq-ser" placeholder="Serial number"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Assigned To</label><input class="f-inp" id="eq-asgn" placeholder="Officer / Unit"/></div><div class="f-grp"><label class="f-lbl">Condition</label><select class="f-sel" id="eq-cond"><option>Excellent</option><option>Good</option><option>Fair</option><option>Needs Service</option></select></div></div>
+      <div class="f-grp"><label class="f-lbl">Status</label><select class="f-sel" id="eq-stat"><option value="active">IN SERVICE</option><option value="maintenance">MAINTENANCE</option><option value="retired">RETIRED</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-eq')">CANCEL</button><button class="btn btn-gold" onclick="saveEq()">LOG ITEM</button></div>
+  </div>
+</div>
+
+<!-- NEW USER -->
+<div class="modal-overlay" id="modal-new-user">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">CREATE USER ACCOUNT</div><button class="modal-close" onclick="closeModal('new-user')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Full Name *</label><input class="f-inp" id="u-name" placeholder="Last, First"/></div><div class="f-grp"><label class="f-lbl">Badge # (Username) *</label><input class="f-inp" id="u-badge" placeholder="Badge number"/></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Rank</label><select class="f-sel" id="u-rank"><option>Detective</option><option>Detective II</option><option>Detective III</option><option>Sergeant</option><option>Lieutenant</option><option>Captain</option></select></div><div class="f-grp"><label class="f-lbl">Access Level</label><select class="f-sel" id="u-access"><option value="officer">OFFICER — Standard</option><option value="detective">DETECTIVE — Elevated</option><option value="supervisor">SUPERVISOR — Full</option><option value="admin">ADMIN — Command</option></select></div></div>
+      <div class="form-row"><div class="f-grp"><label class="f-lbl">Password *</label><input class="f-inp" id="u-pass" type="password" placeholder="Set password"/></div><div class="f-grp"><label class="f-lbl">Confirm Password</label><input class="f-inp" id="u-pass2" type="password" placeholder="Confirm password"/></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('new-user')">CANCEL</button><button class="btn btn-gold" onclick="saveUser()">CREATE ACCOUNT</button></div>
+  </div>
+</div>
+
+<!-- VIEW RECORD MODAL -->
+<div class="modal-overlay" id="modal-view-rec">
+  <div class="modal modal-xl">
+    <div class="modal-head"><div class="modal-title" id="view-title">RECORD</div><button class="modal-close" onclick="closeModal('view-rec')">✕</button></div>
+    <div class="modal-body" id="view-body"></div>
+    <div class="modal-foot" id="view-foot"></div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-box" id="confirm-box">
+  <div class="confirm-inner">
+    <h3>⚠ CONFIRM</h3>
+    <p id="confirm-msg">Are you sure?</p>
+    <div class="confirm-btns">
+      <button class="btn btn-outline" onclick="closeConfirm()">CANCEL</button>
+      <button class="btn btn-red" id="confirm-ok">CONFIRM</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-ic">✓</span><span class="toast-txt" id="toast-txt"></span></div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lb-img" src="" alt=""/>
+  <div class="lightbox-cap" id="lb-cap"></div>
+</div>
+
+<script>
+// ============================================================
+// DATABASE
+// ============================================================
+const DBKEY = 'lapd_sis_v2';
+function loadDB(){try{const r=localStorage.getItem(DBKEY);if(r)return JSON.parse(r);}catch(e){}return{cases:[],operations:[],surveillance:[],suspects:[],evidence:[],reports:[],personnel:[],equipment:[],users:[],activity:[],audit:[],settings:{}};}
+function saveDB(){localStorage.setItem(DBKEY,JSON.stringify(DB));}
+let DB=loadDB();
+let CU=null; // current user
+
+// Temp image storage per form
+const TMP_IMGS = {};
+
+// ============================================================
+// IMAGE HANDLING
+// ============================================================
+function handleImgUpload(key, input) {
+  if(!TMP_IMGS[key]) TMP_IMGS[key] = [];
+  const files = Array.from(input.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const obj = {src: e.target.result, name: file.name};
+      TMP_IMGS[key].push(obj);
+      renderImgPreview(key);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderImgPreview(key) {
+  const container = document.getElementById(key);
+  if(!container) return;
+  container.innerHTML = (TMP_IMGS[key]||[]).map((img,i)=>`
+    <div class="img-preview-item">
+      <img src="${img.src}" alt="${img.name}" onclick="openLightbox('${img.src}','${img.name}')"/>
+      <button class="img-del" onclick="removeImg('${key}',${i})">✕</button>
+      <div class="img-caption">${img.name}</div>
+    </div>
+  `).join('');
+}
+
+function removeImg(key, idx) {
+  TMP_IMGS[key].splice(idx,1);
+  renderImgPreview(key);
+}
+
+function clearTmpImgs(key) {
+  TMP_IMGS[key] = [];
+  const c = document.getElementById(key);
+  if(c) c.innerHTML='';
+}
+
+function openLightbox(src, cap) {
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb-cap').textContent = cap || '';
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// Render image gallery in view
+function renderGallery(images) {
+  if(!images||!images.length) return '';
+  return `<div class="img-gallery">${images.map(img=>`
+    <div class="img-gal-item" onclick="openLightbox('${img.src}','${img.name}')">
+      <img src="${img.src}" alt="${img.name}"/>
+      <div class="img-gal-lbl">${img.name}</div>
+    </div>
+  `).join('')}</div>`;
+}
+
+// Vehicle temp list
+let TMP_VEHICLES = [];
+function addVehicle() {
+  const plate = document.getElementById('veh-plate').value.trim();
+  const desc = document.getElementById('veh-desc').value.trim();
+  if(!plate && !desc) return;
+  TMP_VEHICLES.push({plate, desc});
+  document.getElementById('veh-plate').value='';
+  document.getElementById('veh-desc').value='';
+  renderVehicleList();
+}
+function removeVehicle(i) {
+  TMP_VEHICLES.splice(i,1);
+  renderVehicleList();
+}
+function renderVehicleList() {
+  const el = document.getElementById('veh-list');
+  if(!el) return;
+  el.innerHTML = TMP_VEHICLES.map((v,i)=>`
+    <div class="vehicle-item">
+      <div class="vehicle-ic">🚗</div>
+      <div class="vehicle-info">
+        <div class="vehicle-plate">${v.plate||'NO PLATE'}</div>
+        <div class="vehicle-desc">${v.desc||'—'}</div>
+      </div>
+      <button class="btn btn-red btn-sm" onclick="removeVehicle(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// LAPD LOGO — embed base64
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // Logo is embedded via script injection after file creation
+  const logoSrc = document.getElementById('lapd-logo-login')?.getAttribute('src');
+});
+
+// ============================================================
+// AUTH
+// ============================================================
+function getUsers() {
+  const def = [{badge:'ADMIN',password:'sis2024',name:'Administrator',rank:'Captain',access:'admin'}];
+  if(!DB.users||!DB.users.length) return def;
+  if(!DB.users.find(u=>u.badge==='ADMIN')) return [...def,...DB.users];
+  return DB.users;
+}
+
+function doLogin() {
+  const b = document.getElementById('lg-user').value.trim().toUpperCase();
+  const p = document.getElementById('lg-pass').value;
+  const u = getUsers().find(x=>x.badge.toUpperCase()===b&&x.password===p);
+  if(u) {
+    CU=u;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').classList.add('show');
+    document.getElementById('tb-rank').textContent=u.rank.toUpperCase();
+    document.getElementById('tb-name').textContent=u.name.toUpperCase();
+    if(u.access==='admin'||u.access==='supervisor'){
+      document.getElementById('nav-admin-lbl').style.display='block';
+      document.getElementById('nav-admin-item').style.display='flex';
+      document.getElementById('btn-add-per').style.display='inline-flex';
+    }
+    refreshDash();
+    startClock();
+    auditLog(`User ${u.name} (${u.badge}) logged in`);
+  } else {
+    const e=document.getElementById('lg-err');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',3000);
+  }
+}
+
+function doLogout() {
+  auditLog(`User ${CU?.name} logged out`);
+  CU=null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('lg-user').value='';
+  document.getElementById('lg-pass').value='';
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function startClock(){updateClock();setInterval(updateClock,1000);}
+function updateClock(){
+  const n=new Date();
+  document.getElementById('tb-time').textContent=n.toLocaleTimeString('en-US',{hour12:false});
+  document.getElementById('tb-date').textContent=n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pg = document.getElementById('page-'+id);
+  if(pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('data-page')===id) n.classList.add('active');
+  });
+  const renderMap={cases:renderCases,operations:renderOps,surveillance:renderSurv,suspects:renderSuspects,evidence:renderEv,reports:renderRpts,personnel:renderPer,equipment:renderEq,admin:()=>{renderUsers();renderAuditLog();}};
+  if(renderMap[id]) renderMap[id]();
+  if(id==='dashboard') refreshDash();
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id){document.getElementById('modal-'+id).classList.add('open');}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id.replace('modal-',''));}));
+
+// Auto-generate IDs
+function genId(prefix,n){return`${prefix}-${new Date().getFullYear()}-${String(n+1).padStart(4,'0')}`;}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg,err=false){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-txt').textContent=msg;
+  document.getElementById('toast-ic').textContent=err?'⚠':'✓';
+  t.className=`toast show${err?' err':''}`;
+  setTimeout(()=>t.className='toast',3200);
+}
+
+// ============================================================
+// CONFIRM
+// ============================================================
+let _cfCb=null;
+function confirmAct(msg,cb){
+  document.getElementById('confirm-msg').textContent=msg;
+  _cfCb=cb;
+  document.getElementById('confirm-box').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirm-box').classList.remove('open');_cfCb=null;}
+document.getElementById('confirm-ok').onclick=()=>{if(_cfCb)_cfCb();closeConfirm();};
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+function auditLog(msg){
+  if(!DB.audit)DB.audit=[];
+  DB.audit.push({msg,time:new Date().toLocaleString(),user:CU?.badge||'SYS'});
+  saveDB();
+}
+function renderAuditLog(){
+  const el=document.getElementById('audit-log');
+  if(!el)return;
+  if(!DB.audit?.length){el.innerHTML='<div style="color:var(--text3);text-align:center;padding:20px;">NO ENTRIES</div>';return;}
+  el.innerHTML=[...DB.audit].reverse().slice(0,100).map(a=>`
+    <div class="audit-entry">
+      <span class="audit-time">${a.time}</span>
+      <span class="audit-user">[${a.user}]</span>
+      <span class="audit-msg">${a.msg}</span>
+    </div>
+  `).join('');
+}
+function clearAudit(){DB.audit=[];saveDB();renderAuditLog();toast('Audit log cleared.');}
+
+// ============================================================
+// ACTIVITY
+// ============================================================
+function addAct(txt,color){
+  if(!DB.activity)DB.activity=[];
+  DB.activity.push({txt,color:color||'var(--blue)',time:new Date().toLocaleString()});
+  if(DB.activity.length>60)DB.activity=DB.activity.slice(-60);
+}
+function clearActivity(){DB.activity=[];saveDB();refreshDash();}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function refreshDash(){
+  DB=loadDB();
+  document.getElementById('s-cases').textContent=DB.cases.filter(c=>c.status==='active'||c.status==='critical').length;
+  document.getElementById('s-crit').textContent=DB.cases.filter(c=>c.priority=='1'||c.status==='critical').length;
+  document.getElementById('s-sus').textContent=DB.suspects.filter(s=>s.status==='active'||s.status==='wanted').length;
+  document.getElementById('s-ops').textContent=DB.operations.length;
+  document.getElementById('s-ev').textContent=DB.evidence.length;
+  document.getElementById('s-rpts').textContent=DB.reports.length;
+  document.getElementById('s-per').textContent=DB.personnel.length;
+  document.getElementById('s-cls').textContent=DB.cases.filter(c=>c.status==='closed').length;
+  updateNavChips();
+  renderDashActivity();
+  renderDashAlerts();
+  renderDashCases();
+  renderDashOps();
+}
+
+function updateNavChips(){
+  document.getElementById('nc-cases').textContent=DB.cases.filter(c=>c.status==='active'||c.status==='critical').length;
+  document.getElementById('nc-ops').textContent=DB.operations.filter(o=>o.status==='active').length;
+  document.getElementById('nc-sus').textContent=DB.suspects.filter(s=>s.status==='wanted').length;
+}
+
+function renderDashActivity(){
+  const el=document.getElementById('dash-activity');
+  if(!DB.activity?.length){el.innerHTML=emptyHtml('No recent activity');return;}
+  el.innerHTML=[...DB.activity].reverse().slice(0,12).map(a=>`
+    <div class="act-item">
+      <div class="act-dot" style="background:${a.color}"></div>
+      <div class="act-body"><div class="act-text">${a.txt}</div><div class="act-time">${a.time}</div></div>
+    </div>
+  `).join('');
+}
+
+function renderDashAlerts(){
+  const el=document.getElementById('dash-alerts');
+  const crits=DB.cases.filter(c=>c.status==='critical'||c.priority=='1');
+  const wanted=DB.suspects.filter(s=>s.status==='wanted');
+  let html='';
+  crits.slice(0,3).forEach(c=>html+=`<div class="act-item"><div class="act-dot" style="background:var(--red)"></div><div class="act-body"><div class="act-text" style="color:var(--red2)">CRITICAL: ${c.caseNumber} — ${c.title}</div><div class="act-time">${c.type} | Det. ${c.detective}</div></div></div>`);
+  wanted.slice(0,3).forEach(s=>html+=`<div class="act-item"><div class="act-dot" style="background:var(--orange)"></div><div class="act-body"><div class="act-text" style="color:var(--orange)">WANTED: ${s.name}</div><div class="act-time">Alias: ${s.alias||'N/A'} | Threat: ${s.threat?.toUpperCase()}</div></div></div>`);
+  el.innerHTML=html||emptyHtml('No active alerts');
+}
+
+function renderDashCases(){
+  const el=document.getElementById('dash-cases');
+  const r=[...DB.cases].reverse().slice(0,5);
+  if(!r.length){el.innerHTML=emptyHtml('No cases logged');return;}
+  el.innerHTML=r.map(c=>`<div class="act-item" onclick="viewRec('case','${c.id}')">
+    <div class="act-dot" style="background:${c.status==='critical'?'var(--red)':c.status==='active'?'var(--green)':'var(--text3)'}"></div>
+    <div class="act-body" style="flex:1"><div class="act-text">${c.caseNumber} — ${c.title}</div><div class="act-time">${c.type} | ${c.detective}</div></div>
+    <span class="badge b-${c.status}">${c.status}</span>
+  </div>`).join('');
+}
+
+function renderDashOps(){
+  const el=document.getElementById('dash-ops');
+  const r=[...DB.operations].reverse().slice(0,5);
+  if(!r.length){el.innerHTML=emptyHtml('No operations logged');return;}
+  el.innerHTML=r.map(o=>`<div class="act-item">
+    <div class="act-dot" style="background:${o.status==='active'?'var(--cyan)':'var(--text3)'}"></div>
+    <div class="act-body" style="flex:1"><div class="act-text">${o.code} — ${o.name}</div><div class="act-time">${o.type} | ${o.location||'N/A'}</div></div>
+    <span class="badge b-${o.status==='completed'?'closed':o.status==='active'?'active':'pending'}">${o.status}</span>
+  </div>`).join('');
+}
+
+function emptyHtml(msg){return`<div class="empty"><div class="empty-ic">◉</div><div class="empty-txt">${msg.toUpperCase()}</div></div>`;}
+
+// ============================================================
+// TABLE FILTER
+// ============================================================
+function filterTbl(tblId, q){
+  const tbody=document.getElementById(tblId)?.querySelector('tbody')||document.querySelector(`#${tblId} tbody`);
+  if(!tbody)return;
+  const lq=q.toLowerCase();
+  tbody.querySelectorAll('tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(lq)?'':'none';});
+}
+
+// ============================================================
+// SAVE FUNCTIONS
+// ============================================================
+function saveCase(){
+  const num=v('c-num'),title=v('c-title'),det=v('c-det'),sum=v('c-summary');
+  if(!num||!title||!det||!sum){toast('Fill required fields.',true);return;}
+  const rec={id:Date.now()+'',caseNumber:num,title,type:v('c-type'),priority:v('c-prio'),detective:det,dateOpened:v('c-date'),location:v('c-loc'),suspects:v('c-suspects'),summary:sum,classification:v('c-class'),status:v('c-status'),notes:v('c-notes'),images:[...(TMP_IMGS['case-imgs']||[])],comments:[],createdBy:CU?.name,createdAt:new Date().toISOString()};
+  DB.cases.push(rec);addAct(`Case filed: ${num} — ${title}`,'var(--blue)');auditLog(`Case created: ${num}`);saveDB();closeModal('new-case');clearTmpImgs('case-imgs');clearF(['c-num','c-title','c-det','c-date','c-loc','c-suspects','c-summary','c-notes']);renderCases();refreshDash();toast(`Case ${num} filed.`);
+}
+
+function saveOp(){
+  const code=v('o-code'),name=v('o-name');
+  if(!code||!name){toast('Fill required fields.',true);return;}
+  const rec={id:Date.now()+'',code,name,type:v('o-type'),status:v('o-status'),caseNumber:v('o-case'),lead:v('o-lead'),location:v('o-loc'),date:v('o-date'),team:v('o-team'),objective:v('o-obj'),outcome:v('o-out'),comments:[],createdBy:CU?.name,createdAt:new Date().toISOString()};
+  DB.operations.push(rec);addAct(`Operation logged: ${code} — ${name}`,'var(--cyan)');auditLog(`Operation: ${code}`);saveDB();closeModal('new-op');renderOps();refreshDash();toast(`Operation ${code} logged.`);
+}
+
+function saveSurv(){
+  const id=v('sv-id'),sub=v('sv-sub');
+  if(!id||!sub){toast('Fill required fields.',true);return;}
+  const start=v('sv-start'),end=v('sv-end');
+  const dur=start&&end?calcDur(start,end):'N/A';
+  const rec={id:Date.now()+'',logId:id,subject:sub,location:v('sv-loc'),linkedCase:v('sv-case'),start,end,duration:dur,team:v('sv-team'),vehicles:v('sv-veh'),activity:v('sv-act'),media:v('sv-media'),images:[...(TMP_IMGS['surv-imgs']||[])],comments:[],createdBy:CU?.name,createdAt:new Date().toISOString()};
+  DB.surveillance.push(rec);addAct(`Surveillance: ${id} on ${sub}`,'var(--accent)');auditLog(`Surveillance: ${id}`);saveDB();closeModal('new-surv');clearTmpImgs('surv-imgs');renderSurv();toast(`Surveillance ${id} logged.`);
+}
+
+function saveSuspect(){
+  const id=v('ss-id'),name=v('ss-name');
+  if(!id||!name){toast('Fill required fields.',true);return;}
+  const rec={id:Date.now()+'',subjectId:id,name,alias:v('ss-alias'),dob:v('ss-dob'),description:v('ss-desc'),hw:v('ss-hw'),address:v('ss-addr'),linkedCase:v('ss-case'),threat:v('ss-threat'),status:v('ss-status'),history:v('ss-hist'),marks:v('ss-marks'),vehicles:[...TMP_VEHICLES],images:[...(TMP_IMGS['sus-imgs']||[])],comments:[],createdBy:CU?.name,createdAt:new Date().toISOString()};
+  DB.suspects.push(rec);addAct(`Subject added: ${id} — ${name}`,'var(--red)');auditLog(`Suspect: ${id}`);saveDB();closeModal('new-suspect');clearTmpImgs('sus-imgs');TMP_VEHICLES=[];renderVehicleList();renderSuspects();refreshDash();toast(`Subject ${id} added.`);
+}
+
+function saveEv(){
+  const id=v('ev-id'),desc=v('ev-desc');
+  if(!id||!desc){toast('Fill required fields.',true);return;}
+  const rec={id:Date.now()+'',evidenceId:id,description:desc,type:v('ev-type'),caseNumber:v('ev-case'),officer:v('ev-off'),dateCollected:v('ev-date'),location:v('ev-loc'),storage:v('ev-stor'),chainOfCustody:v('ev-chain'),images:[...(TMP_IMGS['ev-imgs']||[])],comments:[],createdBy:CU?.name,createdAt:new Date().toISOString()};
+  DB.evidence.push(rec);addAct(`Evidence: ${id} — ${desc.slice(0,40)}`,'var(--orange)');auditLog(`Evidence: ${id}`);saveDB();closeModal('new-ev');clearTmpImgs('ev-imgs');renderEv();refreshDash();toast(`Evidence ${id} logged.`);
+}
+
+function saveRpt(){
+  const id=v('r-id'),title=v('r-title'),narr=v('r-narr');
+  if(!id||!title||!narr){toast('Fill required fields.',true);return;}
+  const rec={id:Date.now()+'',reportId:id,title,type:v('r-type'),classification:v('r-class'),caseNumber:v('r-case'),author:v('r-auth'),dateFiled:v('r-date'),narrative:narr,comments:[],createdBy:CU?.name,createdAt:new Date().toISOString()};
+  DB.reports.push(rec);addAct(`Report filed: ${id} — ${title}`,'var(--green)');auditLog(`Report: ${id}`);saveDB();closeModal('new-rpt');renderRpts();refreshDash();toast(`Report ${id} filed.`);
+}
+
+function savePer(){
+  const name=v('p-name'),badge=v('p-badge');
+  if(!name||!badge){toast('Fill required fields.',true);return;}
+  const rec={id:Date.now()+'',name,badge,rank:v('p-rank'),specialization:v('p-spec'),status:v('p-status'),years:v('p-yrs'),notes:v('p-notes'),createdBy:CU?.name};
+  DB.personnel.push(rec);auditLog(`Personnel: ${name} (${badge})`);saveDB();closeModal('new-per');renderPer();refreshDash();toast(`Officer ${name} added.`);
+}
+
+function saveEq(){
+  const id=v('eq-id'),desc=v('eq-desc');
+  if(!id||!desc){toast('Fill required fields.',true);return;}
+  const rec={id:Date.now()+'',itemId:id,description:desc,category:v('eq-cat'),serial:v('eq-ser'),assignedTo:v('eq-asgn'),condition:v('eq-cond'),status:v('eq-stat'),createdBy:CU?.name};
+  DB.equipment.push(rec);auditLog(`Equipment: ${id}`);saveDB();closeModal('new-eq');renderEq();toast(`Equipment ${id} logged.`);
+}
+
+function saveUser(){
+  const name=v('u-name'),badge=v('u-badge').toUpperCase(),pass=v('u-pass'),pass2=v('u-pass2');
+  if(!name||!badge||!pass){toast('Fill required fields.',true);return;}
+  if(pass!==pass2){toast('Passwords do not match.',true);return;}
+  if(getUsers().find(u=>u.badge===badge)){toast('Badge already exists.',true);return;}
+  if(!DB.users)DB.users=[];
+  DB.users.push({badge,name,password:pass,rank:v('u-rank'),access:v('u-access'),createdAt:new Date().toISOString()});
+  auditLog(`User created: ${badge}`);saveDB();closeModal('new-user');renderUsers();toast(`Account for ${name} created.`);
+}
+
+function saveSysSettings(){
+  DB.settings.co=v('sys-co');DB.settings.alertLevel=v('sys-al');
+  auditLog('System settings updated');saveDB();toast('Settings saved.');
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+const PRIO_LABELS={1:'P1 — CRITICAL',2:'P2 — HIGH',3:'P3 — MEDIUM',4:'P4 — LOW'};
+const PRIO_CLASSES={1:'prio-1',2:'prio-2',3:'prio-3',4:'prio-4'};
+
+function renderCases(){
+  const tbody=document.getElementById('cases-tbody');
+  if(!DB.cases.length){tbody.innerHTML=`<tr><td colspan="9">${emptyHtml('No cases on file — create a new case to begin')}</td></tr>`;return;}
+
+  // Build suspect link mapping
+  const susMap={};
+  DB.suspects.forEach(s=>{
+    const names=[s.name,...(s.alias?s.alias.split(','):[])]
+      .map(n=>n.trim().toLowerCase()).filter(Boolean);
+    names.forEach(n=>susMap[n]=s.id);
+  });
+
+  tbody.innerHTML=DB.cases.map(c=>{
+    // Render suspect names as links if found
+    const suspHTML=(c.suspects||'').split(',').map(n=>{
+      const nt=n.trim();
+      const key=nt.toLowerCase();
+      if(susMap[key]){return `<span class="link-badge" onclick="event.stopPropagation();quickViewSuspect('${susMap[key]}')" title="View suspect file">🔗 ${nt}</span>`;}
+      return `<span style="color:var(--text2)">${nt}</span>`;
+    }).join(', ');
+    return`<tr onclick="viewRec('case','${c.id}')">
+      <td class="accent">${c.caseNumber}</td>
+      <td class="primary">${c.title}</td>
+      <td><span class="badge b-blue">${c.type}</span></td>
+      <td><span class="badge b-${c.status}">${c.status}</span></td>
+      <td><span class="prio ${PRIO_CLASSES[c.priority]||'prio-4'}">${PRIO_LABELS[c.priority]||c.priority}</span></td>
+      <td class="mono">${c.detective}</td>
+      <td class="small">${c.dateOpened||'—'}</td>
+      <td style="max-width:160px">${suspHTML||'—'}</td>
+      <td onclick="event.stopPropagation()"><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="viewRec('case','${c.id}')">VIEW</button><button class="btn btn-red btn-sm" onclick="delRec('cases','${c.id}','${c.caseNumber}')">✕</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderOps(){
+  const tbody=document.getElementById('ops-tbody');
+  if(!DB.operations.length){tbody.innerHTML=`<tr><td colspan="9">${emptyHtml('No operations on file')}</td></tr>`;return;}
+  tbody.innerHTML=DB.operations.map(o=>`<tr onclick="viewRec('op','${o.id}')">
+    <td class="cyan">${o.code}</td>
+    <td class="primary">${o.name}</td>
+    <td><span class="badge b-cyan">${o.type}</span></td>
+    <td><span class="badge b-${o.status==='completed'?'closed':o.status==='active'?'active':o.status==='aborted'?'critical':'pending'}">${o.status}</span></td>
+    <td class="accent">${o.caseNumber||'—'}</td>
+    <td>${o.location||'—'}</td>
+    <td class="small">${o.date?o.date.replace('T',' ').slice(0,16):'—'}</td>
+    <td class="mono">${o.lead||'—'}</td>
+    <td onclick="event.stopPropagation()"><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="viewRec('op','${o.id}')">VIEW</button><button class="btn btn-red btn-sm" onclick="delRec('operations','${o.id}','${o.code}')">✕</button></div></td>
+  </tr>`).join('');
+}
+
+function renderSurv(){
+  const tbody=document.getElementById('surv-tbody');
+  if(!DB.surveillance.length){tbody.innerHTML=`<tr><td colspan="9">${emptyHtml('No surveillance logs on file')}</td></tr>`;return;}
+  tbody.innerHTML=DB.surveillance.map(s=>`<tr onclick="viewRec('surv','${s.id}')">
+    <td class="cyan">${s.logId}</td>
+    <td class="primary">${s.subject}</td>
+    <td>${s.location||'—'}</td>
+    <td class="small">${s.start?s.start.replace('T',' ').slice(0,16):'—'}</td>
+    <td class="mono" style="color:var(--cyan)">${s.duration||'—'}</td>
+    <td>${s.team||'—'}</td>
+    <td class="accent">${s.linkedCase||'—'}</td>
+    <td><span class="badge b-${s.media==='None'?'closed':'blue'}">${s.media||'—'}</span></td>
+    <td onclick="event.stopPropagation()"><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="viewRec('surv','${s.id}')">VIEW</button><button class="btn btn-red btn-sm" onclick="delRec('surveillance','${s.id}','${s.logId}')">✕</button></div></td>
+  </tr>`).join('');
+}
+
+function renderSuspects(){
+  const tbody=document.getElementById('sus-tbody');
+  if(!DB.suspects.length){tbody.innerHTML=`<tr><td colspan="9">${emptyHtml('No subjects on file')}</td></tr>`;return;}
+  tbody.innerHTML=DB.suspects.map(s=>{
+    const thumb=s.images&&s.images.length?`<img src="${s.images[0].src}" style="width:36px;height:36px;object-fit:cover;border-radius:2px;border:1px solid var(--border);cursor:pointer;" onclick="event.stopPropagation();openLightbox('${s.images[0].src}','${s.name}')"/>`:`<div style="width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:10px;">—</div>`;
+    return`<tr onclick="viewRec('suspect','${s.id}')">
+      <td class="red" style="font-family:var(--font-mono);font-size:11px;">${s.subjectId}</td>
+      <td>${thumb}</td>
+      <td class="primary">${s.name}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--accent)">${s.alias||'—'}</td>
+      <td class="small">${s.dob||'—'}</td>
+      <td><span class="badge b-${s.threat==='critical'?'critical':s.threat==='high'?'orange':'pending'}">${s.threat||'—'}</span></td>
+      <td><span class="badge b-${s.status==='wanted'||s.status==='active'?'wanted':'closed'}">${s.status||'—'}</span></td>
+      <td class="accent">${s.linkedCase||'—'}</td>
+      <td onclick="event.stopPropagation()"><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="viewRec('suspect','${s.id}')">VIEW</button><button class="btn btn-red btn-sm" onclick="delRec('suspects','${s.id}','${s.subjectId}')">✕</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderEv(){
+  const tbody=document.getElementById('ev-tbody');
+  if(!DB.evidence.length){tbody.innerHTML=`<tr><td colspan="9">${emptyHtml('Evidence vault empty')}</td></tr>`;return;}
+  tbody.innerHTML=DB.evidence.map(e=>{
+    const thumb=e.images&&e.images.length?`<img src="${e.images[0].src}" style="width:36px;height:36px;object-fit:cover;border-radius:2px;border:1px solid var(--border);cursor:pointer;" onclick="event.stopPropagation();openLightbox('${e.images[0].src}','${e.evidenceId}')"/>`:`<div style="width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:10px;">—</div>`;
+    return`<tr onclick="viewRec('ev','${e.id}')">
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--orange)">${e.evidenceId}</td>
+      <td>${thumb}</td>
+      <td class="primary">${e.description}</td>
+      <td><span class="badge b-orange">${e.type}</span></td>
+      <td class="accent">${e.caseNumber||'—'}</td>
+      <td class="mono">${e.officer||'—'}</td>
+      <td class="small">${e.dateCollected?e.dateCollected.replace('T',' ').slice(0,16):'—'}</td>
+      <td>${e.storage||'—'}</td>
+      <td onclick="event.stopPropagation()"><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="viewRec('ev','${e.id}')">VIEW</button><button class="btn btn-red btn-sm" onclick="delRec('evidence','${e.id}','${e.evidenceId}')">✕</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRpts(){
+  const tbody=document.getElementById('rpt-tbody');
+  if(!DB.reports.length){tbody.innerHTML=`<tr><td colspan="8">${emptyHtml('No reports filed')}</td></tr>`;return;}
+  tbody.innerHTML=DB.reports.map(r=>`<tr onclick="viewRec('rpt','${r.id}')">
+    <td style="font-family:var(--font-mono);font-size:11px;color:var(--green)">${r.reportId}</td>
+    <td class="primary">${r.title}</td>
+    <td><span class="badge b-blue">${r.type}</span></td>
+    <td class="accent">${r.caseNumber||'—'}</td>
+    <td class="mono">${r.author||r.createdBy||'—'}</td>
+    <td class="small">${r.dateFiled||'—'}</td>
+    <td style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">${r.classification}</td>
+    <td onclick="event.stopPropagation()"><div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="viewRec('rpt','${r.id}')">VIEW</button><button class="btn btn-red btn-sm" onclick="delRec('reports','${r.id}','${r.reportId}')">✕</button></div></td>
+  </tr>`).join('');
+}
+
+function renderPer(){
+  const grid=document.getElementById('per-grid');
+  if(!DB.personnel.length){grid.innerHTML=`<div style="grid-column:span 3">${emptyHtml('No personnel on file')}</div>`;return;}
+  grid.innerHTML=DB.personnel.map(p=>{
+    const ini=p.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    return`<div class="person-card" onclick="viewRec('per','${p.id}')">
+      <div class="person-av">${ini}</div>
+      <div class="person-name">${p.name}</div>
+      <div class="person-rank">${p.rank.toUpperCase()}</div>
+      <span class="badge b-${p.status==='active'?'active':'closed'}">${p.status}</span>
+      <div class="person-meta">BADGE: ${p.badge}<br>${p.specialization?'SPEC: '+p.specialization+'<br>':''}${p.years?p.years+' YRS SERVICE':''}</div>
+      ${CU?.access==='admin'?`<button class="btn btn-red btn-sm" style="width:100%;margin-top:10px;" onclick="event.stopPropagation();delRec('personnel','${p.id}','${p.name}')">REMOVE</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderEq(){
+  const tbody=document.getElementById('eq-tbody');
+  if(!DB.equipment.length){tbody.innerHTML=`<tr><td colspan="8">${emptyHtml('No equipment logged')}</td></tr>`;return;}
+  tbody.innerHTML=DB.equipment.map(e=>`<tr>
+    <td class="cyan">${e.itemId}</td>
+    <td class="primary">${e.description}</td>
+    <td><span class="badge b-blue">${e.category}</span></td>
+    <td class="mono">${e.serial||'—'}</td>
+    <td>${e.assignedTo||'—'}</td>
+    <td><span class="badge b-${e.status==='active'?'active':e.status==='maintenance'?'pending':'closed'}">${e.status}</span></td>
+    <td>${e.condition||'—'}</td>
+    <td><button class="btn btn-red btn-sm" onclick="delRec('equipment','${e.id}','${e.itemId}')">✕</button></td>
+  </tr>`).join('');
+}
+
+function renderUsers(){
+  const tbody=document.getElementById('users-tbody');
+  tbody.innerHTML=getUsers().map(u=>`<tr>
+    <td class="cyan">${u.badge}</td>
+    <td>${u.name}</td>
+    <td class="mono">${u.rank||'—'}</td>
+    <td><span class="badge b-${u.access==='admin'?'critical':u.access==='supervisor'?'active':'blue'}">${u.access}</span></td>
+    <td>${u.badge!=='ADMIN'?`<button class="btn btn-red btn-sm" onclick="delUser('${u.badge}')">REVOKE</button>`:'<span style="color:var(--accent);font-family:var(--font-mono);font-size:9px;">★ ROOT</span>'}</td>
+  </tr>`).join('');
+}
+
+// ============================================================
+// VIEW RECORD (detail modal with comments, images, links)
+// ============================================================
+function viewRec(type, id) {
+  let rec, title, html;
+
+  if(type==='case') {
+    rec=DB.cases.find(c=>c.id===id);
+    if(!rec)return;
+    title=`CASE FILE — ${rec.caseNumber}`;
+
+    // Suspect links
+    const susMap={};
+    DB.suspects.forEach(s=>{
+      const names=[s.name,...(s.alias?s.alias.split(','):[])].map(n=>n.trim().toLowerCase()).filter(Boolean);
+      names.forEach(n=>susMap[n]=s.id);
+    });
+    const suspLinked=(rec.suspects||'').split(',').map(n=>{
+      const nt=n.trim();const key=nt.toLowerCase();
+      return susMap[key]?`<span class="link-badge" onclick="quickViewSuspect('${susMap[key]}')" title="View suspect file">🔗 ${nt}</span>`:`<span>${nt}</span>`;
+    }).join(', ');
+
+    html=`
+      <div class="cls-banner" style="margin-bottom:14px;"><span>⬛</span><div class="cls-txt">${rec.classification} &nbsp;|&nbsp; CASE ${rec.caseNumber}</div><span class="badge b-${rec.status}" style="margin-left:auto;">${rec.status}</span></div>
+      <div class="grid2">
+        <div>
+          <div class="detail-section">
+            <div class="detail-stitle">Case Details</div>
+            ${df('Case Number',`<span style="color:var(--accent);font-family:var(--font-mono)">${rec.caseNumber}</span>`)}
+            ${df('Title',`<strong>${rec.title}</strong>`)}
+            ${df('Crime Type',`<span class="badge b-blue">${rec.type}</span>`)}
+            ${df('Priority',`<span class="prio ${PRIO_CLASSES[rec.priority]||'prio-4'}">${PRIO_LABELS[rec.priority]||rec.priority}</span>`)}
+            ${df('Status',`<span class="badge b-${rec.status}">${rec.status}</span>`)}
+            ${df('Lead Detective',rec.detective)}
+            ${df('Date Opened',rec.dateOpened||'—')}
+            ${df('Location',rec.location||'—')}
+            ${df('Suspects',suspLinked||'—')}
+            ${df('Created By',rec.createdBy||'—')}
+          </div>
+          ${rec.images&&rec.images.length?`<div class="detail-section"><div class="detail-stitle">Case Photos / Media</div>${renderGallery(rec.images)}</div>`:''}
+        </div>
+        <div>
+          <div class="detail-section"><div class="detail-stitle">Case Summary</div><p style="font-size:13px;color:var(--text2);line-height:1.7;">${rec.summary}</p></div>
+          ${rec.notes?`<div class="detail-section"><div class="detail-stitle">Investigative Notes</div><p style="font-size:13px;color:var(--text2);line-height:1.7;">${rec.notes}</p></div>`:''}
+        </div>
+      </div>
+      ${commentSection(rec, 'cases', id)}
+    `;
+  }
+  else if(type==='op') {
+    rec=DB.operations.find(o=>o.id===id);
+    if(!rec)return;
+    title=`OPERATION — ${rec.code}`;
+    html=`
+      <div class="grid2">
+        <div class="detail-section">
+          <div class="detail-stitle">Operation Details</div>
+          ${df('Code',`<span style="color:var(--cyan);font-family:var(--font-mono)">${rec.code}</span>`)}
+          ${df('Name',`<strong>${rec.name}</strong>`)}
+          ${df('Type',`<span class="badge b-cyan">${rec.type}</span>`)}
+          ${df('Status',`<span class="badge b-${rec.status==='completed'?'closed':rec.status==='active'?'active':'pending'}">${rec.status}</span>`)}
+          ${df('Linked Case',rec.caseNumber?`<span class="link-badge" onclick="findCase('${rec.caseNumber}')">📁 ${rec.caseNumber}</span>`:'—')}
+          ${df('Team Leader',rec.lead||'—')}
+          ${df('Date/Time',rec.date?rec.date.replace('T',' '):'—')}
+          ${df('Location',rec.location||'—')}
+          ${df('Team',rec.team||'—')}
+        </div>
+        <div>
+          <div class="detail-section"><div class="detail-stitle">Objective</div><p style="font-size:13px;color:var(--text2);line-height:1.7;">${rec.objective||'N/A'}</p></div>
+          <div class="detail-section"><div class="detail-stitle">Outcome / Notes</div><p style="font-size:13px;color:var(--text2);line-height:1.7;">${rec.outcome||'N/A'}</p></div>
+        </div>
+      </div>
+      ${commentSection(rec,'operations',id)}
+    `;
+  }
+  else if(type==='surv') {
+    rec=DB.surveillance.find(s=>s.id===id);
+    if(!rec)return;
+    title=`SURVEILLANCE LOG — ${rec.logId}`;
+    html=`
+      <div class="grid2">
+        <div class="detail-section">
+          <div class="detail-stitle">Surveillance Details</div>
+          ${df('Log ID',`<span style="color:var(--cyan);font-family:var(--font-mono)">${rec.logId}</span>`)}
+          ${df('Subject',`<strong>${rec.subject}</strong>`)}
+          ${df('Location',rec.location||'—')}
+          ${df('Start',rec.start?rec.start.replace('T',' '):'—')}
+          ${df('End',rec.end?rec.end.replace('T',' '):'—')}
+          ${df('Duration',`<span style="color:var(--cyan);font-family:var(--font-mono)">${rec.duration||'—'}</span>`)}
+          ${df('Team',rec.team||'—')}
+          ${df('Vehicles/Equip',rec.vehicles||'—')}
+          ${df('Media',rec.media||'—')}
+          ${df('Linked Case',rec.linkedCase||'—')}
+        </div>
+        <div>
+          <div class="detail-section"><div class="detail-stitle">Notable Activity</div><p style="font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap;">${rec.activity||'N/A'}</p></div>
+          ${rec.images&&rec.images.length?`<div class="detail-section"><div class="detail-stitle">Surveillance Photos</div>${renderGallery(rec.images)}</div>`:''}
+        </div>
+      </div>
+      ${commentSection(rec,'surveillance',id)}
+    `;
+  }
+  else if(type==='suspect') {
+    rec=DB.suspects.find(s=>s.id===id);
+    if(!rec)return;
+    title=`SUBJECT FILE — ${rec.subjectId}`;
+    const vehHtml=rec.vehicles&&rec.vehicles.length?rec.vehicles.map(veh=>`<div class="vehicle-item"><div class="vehicle-ic">🚗</div><div class="vehicle-info"><div class="vehicle-plate">${veh.plate||'NO PLATE'}</div><div class="vehicle-desc">${veh.desc||'—'}</div></div></div>`).join(''):'<div style="color:var(--text3);font-family:var(--font-mono);font-size:11px;">No vehicles on record</div>';
+    html=`
+      <div class="cls-banner" style="border-left-color:var(--red);background:rgba(224,80,80,.05);margin-bottom:14px;"><span>⚠</span><div class="cls-txt">THREAT LEVEL: ${(rec.threat||'').toUpperCase()} &nbsp;|&nbsp; STATUS: ${(rec.status||'').toUpperCase()}</div></div>
+      <div class="grid2">
+        <div>
+          <div class="detail-section">
+            <div class="detail-stitle">Subject Information</div>
+            ${df('Subject ID',`<span style="color:var(--red);font-family:var(--font-mono)">${rec.subjectId}</span>`)}
+            ${df('Full Name',`<strong>${rec.name}</strong>`)}
+            ${df('Aliases',rec.alias?`<span style="color:var(--accent);font-family:var(--font-mono)">${rec.alias}</span>`:'None')}
+            ${df('Date of Birth',rec.dob||'Unknown')}
+            ${df('Race/Sex',rec.description||'N/A')}
+            ${df('Height/Weight',rec.hw||'N/A')}
+            ${df('Last Address',rec.address||'Unknown')}
+            ${df('Linked Case',rec.linkedCase?`<span class="link-badge" onclick="findCase('${rec.linkedCase}')">📁 ${rec.linkedCase}</span>`:'—')}
+          </div>
+          <div class="detail-section">
+            <div class="detail-stitle">Subject Photos</div>
+            ${rec.images&&rec.images.length?renderGallery(rec.images):'<div style="color:var(--text3);font-family:var(--font-mono);font-size:11px;">No photos on file</div>'}
+          </div>
+        </div>
+        <div>
+          <div class="detail-section"><div class="detail-stitle">Criminal History / MO</div><p style="font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap;">${rec.history||'N/A'}</p></div>
+          <div class="detail-section"><div class="detail-stitle">Physical Description / Marks</div><p style="font-size:13px;color:var(--text2);line-height:1.7;">${rec.marks||'N/A'}</p></div>
+          <div class="detail-section"><div class="detail-stitle">Associated Vehicles</div>${vehHtml}</div>
+        </div>
+      </div>
+      ${commentSection(rec,'suspects',id)}
+    `;
+  }
+  else if(type==='ev') {
+    rec=DB.evidence.find(e=>e.id===id);
+    if(!rec)return;
+    title=`EVIDENCE — ${rec.evidenceId}`;
+    html=`
+      <div class="grid2">
+        <div class="detail-section">
+          <div class="detail-stitle">Evidence Details</div>
+          ${df('Evidence #',`<span style="color:var(--orange);font-family:var(--font-mono)">${rec.evidenceId}</span>`)}
+          ${df('Type',`<span class="badge b-orange">${rec.type}</span>`)}
+          ${df('Description',`<strong>${rec.description}</strong>`)}
+          ${df('Linked Case',rec.caseNumber?`<span class="link-badge" onclick="findCase('${rec.caseNumber}')">📁 ${rec.caseNumber}</span>`:'—')}
+          ${df('Collected By',rec.officer||'—')}
+          ${df('Date Collected',rec.dateCollected?rec.dateCollected.replace('T',' '):'—')}
+          ${df('Location Found',rec.location||'—')}
+          ${df('Storage',rec.storage||'—')}
+        </div>
+        <div>
+          <div class="detail-section"><div class="detail-stitle">Chain of Custody</div><p style="font-size:13px;color:var(--text2);line-height:1.7;">${rec.chainOfCustody||'No additional notes.'}</p></div>
+          ${rec.images&&rec.images.length?`<div class="detail-section"><div class="detail-stitle">Evidence Photos</div>${renderGallery(rec.images)}</div>`:''}
+        </div>
+      </div>
+      ${commentSection(rec,'evidence',id)}
+    `;
+  }
+  else if(type==='rpt') {
+    rec=DB.reports.find(r=>r.id===id);
+    if(!rec)return;
+    title=`REPORT — ${rec.reportId}`;
+    html=`
+      <div class="detail-section">
+        <div class="detail-stitle">Report Information</div>
+        <div class="grid2">
+          <div>${df('Report #',`<span style="color:var(--green);font-family:var(--font-mono)">${rec.reportId}</span>`)}${df('Title',`<strong>${rec.title}</strong>`)}${df('Type',`<span class="badge b-blue">${rec.type}</span>`)}</div>
+          <div>${df('Classification',`<span style="font-family:var(--font-mono);font-size:10px;color:var(--text3)">${rec.classification}</span>`)}${df('Linked Case',rec.caseNumber?`<span class="link-badge" onclick="findCase('${rec.caseNumber}')">📁 ${rec.caseNumber}</span>`:'—')}${df('Authored By',rec.author||rec.createdBy||'—')}${df('Date Filed',rec.dateFiled||'—')}</div>
+        </div>
+      </div>
+      <div class="detail-section"><div class="detail-stitle">Report Narrative</div><p style="font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap;">${rec.narrative}</p></div>
+      ${commentSection(rec,'reports',id)}
+    `;
+  }
+  else if(type==='per') {
+    rec=DB.personnel.find(p=>p.id===id);
+    if(!rec)return;
+    title=`OFFICER — ${rec.name}`;
+    html=`<div class="detail-section">
+      <div class="detail-stitle">Personnel Record</div>
+      ${df('Name',`<strong>${rec.name}</strong>`)}${df('Badge',`<span style="color:var(--cyan);font-family:var(--font-mono)">${rec.badge}</span>`)}${df('Rank',rec.rank)}${df('Specialization',rec.specialization||'—')}${df('Status',`<span class="badge b-${rec.status==='active'?'active':'closed'}">${rec.status}</span>`)}${df('Years of Service',rec.years?rec.years+' years':'—')}${df('Notes',rec.notes||'—')}
+    </div>`;
+  }
+
+  document.getElementById('view-title').textContent=title;
+  document.getElementById('view-body').innerHTML=html||'<div class="empty"><div class="empty-txt">Record not found</div></div>';
+  document.getElementById('view-foot').innerHTML=`<button class="btn btn-outline" onclick="closeModal('view-rec')">CLOSE</button><button class="btn btn-red" onclick="delRec('${type==='case'?'cases':type==='op'?'operations':type==='surv'?'surveillance':type==='suspect'?'suspects':type==='ev'?'evidence':type==='rpt'?'reports':'personnel'}','${id}','${id}');closeModal('view-rec');">DELETE RECORD</button>`;
+  openModal('view-rec');
+}
+
+// Quick view suspect in popup over current modal
+function quickViewSuspect(susId) {
+  viewRec('suspect', susId);
+}
+
+function findCase(caseNum) {
+  const c=DB.cases.find(x=>x.caseNumber===caseNum);
+  if(c) viewRec('case',c.id);
+  else toast('Case not found: '+caseNum, true);
+}
+
+// ============================================================
+// COMMENT SYSTEM
+// ============================================================
+function commentSection(rec, collection, id) {
+  const comments=rec.comments||[];
+  return`
+    <div class="comment-section">
+      <div class="comment-section-title">💬 DISCUSSION / COMMENTS (${comments.length})</div>
+      <div id="comments-${id}">${renderComments(comments, collection, id)}</div>
+      <div class="comment-form">
+        <input class="comment-inp" id="cmt-inp-${id}" placeholder="Add a comment or note..." onkeydown="if(event.key==='Enter')addComment('${collection}','${id}')"/>
+        <button class="btn btn-outline btn-sm" onclick="addComment('${collection}','${id}')">POST</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderComments(comments, collection, id) {
+  if(!comments||!comments.length) return`<div style="font-family:var(--font-mono);font-size:10px;color:var(--text3);padding:10px 0;">No comments yet.</div>`;
+  return comments.map((c,i)=>`
+    <div class="comment-item">
+      <div class="comment-meta">
+        <span class="comment-author">◈ ${c.author||'Unknown'}</span>
+        <span class="comment-time">${c.time}</span>
+        <button class="comment-del" onclick="delComment('${collection}','${id}',${i})" title="Delete">✕</button>
+      </div>
+      <div class="comment-text">${c.text}</div>
+    </div>
+  `).join('');
+}
+
+function addComment(collection, recId) {
+  const inp=document.getElementById(`cmt-inp-${recId}`);
+  const txt=inp.value.trim();
+  if(!txt)return;
+  const arr=DB[collection];
+  const rec=arr.find(r=>r.id===recId);
+  if(!rec)return;
+  if(!rec.comments)rec.comments=[];
+  rec.comments.push({text:txt,author:CU?.name||'Unknown',time:new Date().toLocaleString()});
+  saveDB();
+  inp.value='';
+  const container=document.getElementById(`comments-${recId}`);
+  if(container) container.innerHTML=renderComments(rec.comments,collection,recId);
+}
+
+function delComment(collection, recId, idx) {
+  const rec=DB[collection].find(r=>r.id===recId);
+  if(!rec)return;
+  rec.comments.splice(idx,1);
+  saveDB();
+  const container=document.getElementById(`comments-${recId}`);
+  if(container) container.innerHTML=renderComments(rec.comments,collection,recId);
+}
+
+// ============================================================
+// DELETE
+// ============================================================
+function delRec(col, id, label) {
+  confirmAct(`Delete "${label}"? This cannot be undone.`, ()=>{
+    DB[col]=DB[col].filter(r=>r.id!==id);
+    auditLog(`Deleted from ${col}: ${label}`);saveDB();refreshDash();
+    const map={cases:renderCases,operations:renderOps,surveillance:renderSurv,suspects:renderSuspects,evidence:renderEv,reports:renderRpts,personnel:renderPer,equipment:renderEq};
+    if(map[col])map[col]();
+    toast(`Record deleted.`);
+  });
+}
+
+function delUser(badge) {
+  confirmAct(`Revoke access for ${badge}?`,()=>{
+    DB.users=DB.users.filter(u=>u.badge!==badge);
+    auditLog(`User revoked: ${badge}`);saveDB();renderUsers();toast(`Access for ${badge} revoked.`);
+  });
+}
+
+function clearAll(){
+  const u=DB.users;
+  DB={cases:[],operations:[],surveillance:[],suspects:[],evidence:[],reports:[],personnel:[],equipment:[],users:u,activity:[],audit:DB.audit||[],settings:{}};
+  saveDB();refreshDash();auditLog('ALL RECORDS CLEARED by '+CU?.name);toast('All records cleared.');
+}
+
+// ============================================================
+// IMPORT / EXPORT
+// ============================================================
+function exportDB(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`SIS_DB_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);
+  auditLog('Database exported');toast('Database exported.');
+}
+function importDB(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{try{DB=JSON.parse(ev.target.result);saveDB();refreshDash();auditLog('Database imported');toast('Database imported.');}catch(err){toast('Invalid file.',true);}};r.readAsText(f);
+}
+
+// ============================================================
+// OVERVIEW TABS
+// ============================================================
+function ovTab(i){
+  document.querySelectorAll('#ov-tabs .tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  for(let j=0;j<4;j++){const el=document.getElementById('ov-tab-'+j);if(el)el.style.display=i===j?'block':'none';}
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function v(id){const e=document.getElementById(id);return e?e.value:'';}
+function clearF(ids){ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});}
+function calcDur(s,e){const d=Math.abs(new Date(e)-new Date(s));return`${Math.floor(d/3600000)}h ${Math.floor((d%3600000)/60000)}m`;}
+function df(key,val){return`<div class="detail-row"><div class="detail-key">${key}</div><div class="detail-val">${val||'—'}</div></div>`;}
+
+// ============================================================
+// INIT
+// ============================================================
+// Auto-open modals with auto-id
+document.getElementById('modal-new-case')?.addEventListener('transitionend',()=>{});
+
+// Patch openModal for auto IDs
+const _openModal=openModal;
+window.openModal=function(id){
+  // Auto-fill IDs
+  const idMap={
+    'new-case':()=>{document.getElementById('c-num').value=genId('SIS',DB.cases.length);document.getElementById('c-date').value=new Date().toISOString().split('T')[0];},
+    'new-op':()=>{document.getElementById('o-code').value=genId('OP',DB.operations.length);},
+    'new-surv':()=>{document.getElementById('sv-id').value=genId('SURV',DB.surveillance.length);},
+    'new-suspect':()=>{document.getElementById('ss-id').value=genId('SBJ',DB.suspects.length);TMP_VEHICLES=[];renderVehicleList();clearTmpImgs('sus-imgs');},
+    'new-ev':()=>{document.getElementById('ev-id').value=genId('EV',DB.evidence.length);},
+    'new-rpt':()=>{document.getElementById('r-id').value=genId('RPT',DB.reports.length);document.getElementById('r-date').value=new Date().toISOString().split('T')[0];},
+    'new-eq':()=>{document.getElementById('eq-id').value=genId('EQ',DB.equipment.length);}
+  };
+  if(idMap[id])idMap[id]();
+  _openModal(id);
+};
+</script>
+HTMLEOF_MARKER
+
+echo "HTML created, size: $(wc -c < /mnt/user-data/outputs/lapd_sis_v2.html) bytes"
